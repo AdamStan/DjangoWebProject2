@@ -1,0 +1,37 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Model: update </title>
+{% endblock %}
+{% block content %}
+<h1 class="text-center"> {{ subject }} </h1>
+<br/>
+<form action="{% url 'entities:edittimetables' %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+        <table>
+            <tr>
+                <td> Room: </td>
+                <td><select class="btn background-second" name="room_id">
+                    <option value="{{ subject.room.id }}"> {{ subject.room }}</option>
+                    {% for r in rooms %}
+                    <option value="{{ r.id }}">{{ r }}</option>
+                    {% endfor %}
+                </select></td>
+            </tr>
+            <tr>
+                <td> Teacher: </td>
+                <td><select class="btn background-second" name="teacher_id">
+                    <option value="{{ subject.teacher.user.id }}"> {{ subject.teacher }}</option>
+                    {% for t in teachers %}
+                    <option value="{{ t.user.id }}">{{ t }}</option>
+                    {% endfor %}
+                </select></td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+    <input type="text" name="object_id" value="{{ object_id }} " hidden>
+    <button class="btn background-second" type="submit" name="action" value="Update"> Update </button>
+</form>
+{% endblock %}

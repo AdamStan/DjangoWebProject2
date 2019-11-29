@@ -1,0 +1,39 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Model: update </title>
+{% endblock %}
+{% block content %}
+<h1 class="text-center"> {{ object }} </h1>
+<br/>
+<form action="{% url 'entities:model_subject' %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+        <table>
+            <tr>
+                <td> Lecture hours: </td>
+                {% if object.lecture_hours %}
+                <td><input type="number" name="lecture_hours" min="10" value="{{ object.lecture_hours }}"></td>
+                {% else %}
+                <td><input type="number" name="lecture_hours" min="10" value=""></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td> Laboratory hours: </td>
+                {% if object.lecture_hours %}
+                <td><input type="number" name="laboratory_hours" min="10" value="{{ object.laboratory_hours }}"></td>
+                {% else %}
+                <td><input type="number" name="laboratory_hours" min="10" value=""></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td> Semester </td>
+                <td><input type="number" name="semester" min="1" value="{{ object.semester }}"></td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+    <input type="text" name="object_id" value="{{ object_id }} " hidden>
+    <button class="btn background-second" type="submit" name="action" value="Update"> Update </button>
+</form>
+{% endblock %}

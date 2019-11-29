@@ -1,0 +1,150 @@
+{% load static from staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block title %}
+    <title> My account </title>
+    {% endblock %}
+    <!-- <script src="{% static 'jquery-3.3.1.min.js' %}"></script> -->
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'myownstyles.css' %}"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="{% static 'bootstrap-4.1.3\js\bootstrap.min.js' %}"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark background-first mb-4">
+            <a href="/" class="navbar-brand"> UniversityMainPage </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle background-first" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        All Plans
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            <form action="{% url 'entities:timetables_student' %}" method="get">
+                                <button class="dropdown-item" type="submit"> Students </button>
+                            </form>
+                            <form action="{% url 'entities:timetables_teacher' %}" method="get">
+                                <button class="dropdown-item" type="submit"> Teachers </button>
+                            </form>
+                            <form action="{% url 'entities:timetables_room' %}" method="get">
+                                <button class="dropdown-item" type="submit"> Rooms </button>
+                            </form>
+                        </div>
+                    </div>
+                    <!--
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'entities:generate' %}"> Generate plans </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'entities:edittimetables' %}"> Edit plans </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'entities:studentplans' %}"> Choose plan </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'entities:studentplan' %}"> My plan s </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'entities:teacherplan' %}"> My plan t </a>
+                    </li>
+                    -->
+                    {% if user.is_authenticated %}
+                        {% if user.admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'entities:generate' %}"> Generate plans </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'entities:edittimetables' %}"> Edit plans </a>
+                            </li>
+                            <div class="dropdown ">
+                                <button class="btn dropdown-toggle background-first" type="button" id="dropdownMenu3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Admin functions
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                    <form action="{% url 'entities:model_student' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Students </button>
+                                    </form>
+                                    <form action="{% url 'entities:model_teacher' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Teachers </button>
+                                    </form>
+                                    <form action="{% url 'entities:model_user' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Admins </button>
+                                    </form>
+                                    <div class="dropdown-divider"></div>
+                                    <form action="{% url 'entities:model_building' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Buildings </button>
+                                    </form>
+                                    <form action="{% url 'entities:model_faculty' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Faculties </button>
+                                    </form>
+                                    <form action="{% url 'entities:model_field_of_study' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Fields of study </button>
+                                    </form>
+                                    <form action="{% url 'entities:model_plan' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Plans </button>
+                                    </form>
+                                    <form action="{% url 'entities:model_room' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Rooms </button>
+                                    </form>
+                                    <form action="{% url 'entities:model_scheduledsubject' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Scheduled subjects </button>
+                                    </form>
+                                    <form action="{% url 'entities:model_subject' %}" method="get">
+                                        <button class="dropdown-item" type="submit"> Subjects </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if user.student %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'entities:studentplans' %}"> Choose plan </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'entities:studentplan' %}"> My plan </a>
+                            </li>
+                        {% endif %}
+                        {% if user.teacher %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'entities:teacherplan' %}"> My plan </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about"> About us </a>
+                    </li>
+                </ul>
+                <div class="form-inline mt-2 mt-md-0">
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'accounts:myprofile' %}" method="get">
+                            <button class="nav-item btn background-second button-margin" type="submit">
+                                My account: {{ user.username }}
+                            </button>
+                        </form>
+                        <form action="{% url 'accounts:logout' %}" method="post">
+                            {% csrf_token %}
+                            <button class="nav-item btn background-second button-margin" type="submit">
+                                Logout
+                            </button>
+                        </form>
+                    {% else %}
+                        <form action="{% url 'accounts:login' %}" method="GET">
+                            {% csrf_token %}
+                            <button class="nav-item btn background-second" type="submit">
+                                Login
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+        <div class="container background-third full-height">
+        {% block content %}
+        {% endblock %}
+        </div>
+</body>
+</html>

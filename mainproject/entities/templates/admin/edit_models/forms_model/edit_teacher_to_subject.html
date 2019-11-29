@@ -1,0 +1,35 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Model: Subject </title>
+{% endblock %}
+{% block content %}
+<h1 class="text-center"> {{ subject }} </h1>
+    <p class="alert-success"> {{ s_message }} </p>
+    <p class="alert-danger"> {{ fail_message }} </p>
+<form action="{% url 'entities:model_teachertosubject' %}" method="post">
+    {% csrf_token %}
+    <table class="table table-bordered">
+        <tr>
+            <th> Choose </th>
+            <th> Name </th>
+            <th> Second name </th>
+            <th> Surname</th>
+            <th> Faculty </th>
+        </tr>
+        {% for teacher in subject.teachers.all %}
+        <tr>
+            <td> <input type="radio" name="user_id" value="{{ teacher.user.id }}"/> </td>
+            <td> {{ teacher.user.name }} </td>
+            <td> {{ teacher.user.second_name }} </td>
+            <td> {{ teacher.user.surname }} </td>
+            <td> {{ teacher.faculty.name }} </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <input type="text" name="subject_id" value="{{ subject.id }}" hidden/>
+    <button class="btn background-second" type="submit" name="action" value="Delete"> Delete </button>
+    <button class="btn background-second" type="submit" name="action" value="Add"> Add </button>
+    <a href="{% url 'entities:model_subject' %}" class="btn background-second"> Back to subjects </a>
+</form>
+{% endblock %}

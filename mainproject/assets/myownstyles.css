@@ -1,0 +1,51 @@
+.background-first{
+    color: white;
+    background-color: green;
+}
+background-first:hover{
+    background-color: green;
+}
+background-first:active{
+    background-color: green;
+}
+background-first:focus{
+    background-color: green;
+}
+background-first:click{
+    background-color: green;
+}
+.background-second{
+    color: black;
+    background-color: limegreen;
+}
+.background-second:hover{
+    background-color: #80ea69;
+}
+.background-second:active{
+    color: white;
+    background-color: #80ea69;
+}
+.background-third{
+    background-color: ivory;
+    height: 100%;
+}
+.background-fourth{
+    background-color: #ffffff;
+}
+.tab-my{
+    table-layout: fixed;
+    width: 100%;
+}
+body {
+    min-height:100vh;
+    font-family: Arial;
+    color: black;
+    background-color: white;
+}
+html{
+    min-height: 100vh;
+}
+.full-height {
+    min-height: 100vh;
+}
+.top-buffer { margin-top:20px; }

@@ -1,0 +1,40 @@
+{% extends 'base_layout.html' %}
+{% block title %}
+<title> Login page </title>
+{% endblock %}
+{% block content %}
+<div class="background-third">
+    <h2 class="text-center"> Login form </h2>
+    {% if form.errors %}
+        <p class="label label-danger">
+            Your username and password didn't match.
+            Please try again.
+        </p>
+    {% endif %}
+    <form class="text-center my-own-table" method="POST">
+        {% csrf_token %}
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    Username
+                </div>
+                <div class="col-sm-4">
+                    <input class="form-control" type="text" name="username">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    Password
+                </div>
+                <div class="col-sm-4">
+                    <input class="form-control" type="password" name="password">
+                </div>
+            </div>
+        </div>
+        {% if request.GET.next %}
+            <input type="hidden" name="next" value = "{{ request.GET.next }}">
+        {% endif %}
+        <input class="btn background-second" value="Login" type="submit" />
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle background-second" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    {{ name }}
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+        {% for arg in arguments %}
+            <button class="dropdown-item" type="button"> {{ arg }} </button>
+        {% endfor %}
+    </div>
+</div>

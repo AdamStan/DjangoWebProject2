@@ -1,0 +1,28 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Model: update </title>
+{% endblock %}
+{% block content %}
+<h1 class="text-center"> {{ subject }} </h1>
+<br/>
+<form action="{% url 'entities:model_teachertosubject' %}" method="post">
+    {% csrf_token %}
+     <div class="table-responsive">
+        <table>
+            <tr>
+                <td> Teacher: </td>
+                <td><select class="btn background-second" name="teacher_id">
+                    {% for t in teachers %}
+                    <option value="{{ t.user.id }}">{{ t }}</option>
+                    {% endfor %}
+                </select></td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+    <input type="text" name="subject_id" value="{{ subject.id }}" hidden>
+    <button class="btn background-second" type="submit" name="action" value="Save"> Update </button>
+    <a href="{% url 'entities:model_scheduledsubject' %}" class="btn background-second"> Cancel </a>
+</form>
+{% endblock %}

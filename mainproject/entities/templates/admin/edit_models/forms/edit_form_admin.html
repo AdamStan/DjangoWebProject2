@@ -1,0 +1,37 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Edit admin </title>
+{% endblock %}
+{% block content %}
+<h1> Admin </h1>
+<form action="{% url 'entities:model_user' %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+            <table>
+                <tr>
+                    <td> Username </td>
+                    <td><input class="form-control" type="text" name="username" value="{{ user_to_edit.username }}"></td>
+                </tr>
+                <tr>
+                    <td> Name </td>
+                    <td><input class="form-control" type="text" name="name" value="{{ user_to_edit.name }}"></td>
+                </tr>
+                <tr>
+                    <td> Second Name </td>
+                    {% if user_to_edit.second_name == None %}
+                    <td><input class="form-control" type="text" name="second_name" value=""></td>
+                    {% else %}
+                    <td><input class="form-control" type="text" name="second_name" value="{{ user_to_edit.second_name }}"></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td> Surname </td>
+                    <td><input class="form-control" type="text" name="surname" value="{{ user_to_edit.surname }}"></td>
+                </tr>
+                <input type="text" name="user_id" value="{{ user_to_edit.id }}" hidden/>
+            </table>
+        </div>
+    <button type="submit" name="action" value="Update"> Update </button>
+</form>
+{% endblock %}

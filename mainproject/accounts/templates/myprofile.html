@@ -1,0 +1,77 @@
+{% extends 'base_layout.html' %}
+{% block title %}
+<title> My profile </title>
+{% endblock %}
+{% block content %}
+    <h1 class="text-center"> Hello {{ user.username }}  </h1>
+    {% if fail_message %}
+    <p class="text-danger"> {{ fail_message }} </p>
+    {% endif %}
+    {% if s_message %}
+    <p class="text-success"> {{ s_message }} </p>
+    {% endif %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <form action="{% url 'accounts:myprofile' %}" method="post">
+                {% csrf_token %}
+                <div class="">
+                    <h2> Change data  </h2>
+                    <table>
+                        <tr>
+                            <td> Username </td>
+                            <td><input class="form-control" type="text" name="username" value="{{ current_user.username }}"></td>
+                        </tr>
+                        <tr>
+                            <td> Name </td>
+                            <td><input class="form-control" type="text" name="name" value="{{ current_user.name }}"></td>
+                        </tr>
+                        <tr>
+                            <td> Second Name </td>
+                            {% if current_user.second_name %}
+                            <td><input class="form-control" type="text" name="second_name" value="{{ current_user.second_name }}"></td>
+                            {% else %}
+                            <td><input class="form-control" type="text" name="second_name" value=""></td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td> Surname </td>
+                            <td><input class="form-control" type="text" name="surname" value="{{ current_user.surname }}"></td>
+                        </tr>
+                    </table>
+                    <input class="btn background-second" type="submit" name="action" value="Update">
+                </div>
+            </form>
+            </div>
+            <div class="col">
+                <form action="{% url 'accounts:myprofile' %}" method="post">
+                    {% csrf_token %}
+                <div class="">
+                    <h2> Change password </h2>
+                    <table>
+                    <tr>
+                        <td> Password </td>
+                        <td>
+                            <input class="form-control" type="password" name="password" minlength="8"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> New password </td>
+                        <td>
+                            <input class="form-control" type="password" name="new_password" minlength="8" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> Confirm new password </td>
+                        <td>
+                            <input class="form-control" type="password" name="confirm_new_password" minlength="8"/>
+                        </td>
+                    </tr>
+                </table>
+                    <input class="btn background-second" type="submit" name="action" value="Change">
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Edit student </title>
+{% endblock %}
+{% block content %}
+<h1> Student </h1>
+<form action="{% url 'entities:model_student' %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+            <table>
+                <tr>
+                    <td> Username </td>
+                    <td><input class="form-control" type="text" name="username" value="{{ student.user.username }}"></td>
+                </tr>
+                <tr>
+                    <td> Name </td>
+                    <td><input class="form-control" type="text" name="name" value="{{ student.user.name }}"></td>
+                </tr>
+                <tr>
+                    <td> Second Name </td>
+                    {% if student.user.second_name %}
+                    <td><input class="form-control" type="text" name="second_name" value="{{ student.user.second_name }}"></td>
+                    {% else %}
+                    <td><input class="form-control" type="text" name="second_name" value=""></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td> Surname </td>
+                    <td><input class="form-control" type="text" name="surname" value="{{ student.user.surname }}"></td>
+                </tr>
+                <tr>
+                    <td> Field of study: </td>
+                    <td><select class="btn background-second" name="field_of_study">
+                        <option value=" {{ student.fieldOfStudy.id }} "> {{ student.fieldOfStudy.name }}
+                            {{ student.fieldOfStudy.degree }} {{ student.fieldOfStudy.type }} </option>
+                        {% for field in fields_of_study %}
+                            <option value="{{ field.id }}"> {{ field.name }} {{ field.degree }} {{ field.type }} </option>
+                        {% endfor %}
+                    </select></td>
+                </tr>
+                <tr>
+                    <td> Semester </td>
+                    <td><input class="form-control" type="text" name="semester" value="{{ student.semester }}"></td>
+                </tr>
+                <tr>
+                    <td> Plan </td>
+                    <td><select class="btn background-second" name="plan_id">
+                        {% if student.plan %}
+                        <option value=" {{ student.plan.id }} "> {{student.plan.title }} </option>
+                        {% else %}
+                        <option value=""> --- no plan --- </option>
+                        {% endif %}
+                        {% for plan in plans %}
+                            <option value="{{ plan.id }}"> {{ plan.title }} </option>
+                        {% endfor %}
+                    </select></td>
+                </tr>
+                <input type="text" name="user_id" value="{{ student.user.id }}" hidden/>
+            </table>
+        </div>
+    <button class="btn background-second" type="submit" name="action" value="Update"> Update </button>
+    <a href="{% url 'entities:model_student' %}" class="btn background-second"> Cancel </a>
+</form>
+{% endblock %}

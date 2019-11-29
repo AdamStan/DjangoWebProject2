@@ -1,0 +1,19 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Model: {{ model_name }} add </title>
+{% endblock %}
+{% block content %}
+<h1> {{ model_name }} </h1>
+{% with url_address="entities:model_"|add:model_name.lower %}
+<form action="{% url url_address %}" method="post">
+    {% csrf_token %}
+    <table>
+        {{ form_my.as_table }}
+    </table>
+    <input type="text" name="object_id" value="{{ object_id }} " hidden>
+    <input class="btn background-second" name="action" value="{{ act }}" type="submit">
+    <a href="{% url url_address %}" class="btn background-second"> Cancel </a>
+</form>
+{% endwith %}
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Model: {{ model_name }} </title>
+{% endblock %}
+{% block content %}
+<h1 class="text-center"> {{ model_name }} </h1>
+    <p class="alert-success"> {{ s_message }} </p>
+    <p class="alert-danger"> {{ fail_message }} </p>
+{% with url_address="entities:model_"|add:model_name.lower %}
+<form action="{% url url_address %}" method="post">
+    {% csrf_token %}
+    <table class="table table-bordered">
+        <tr>
+            <th> Choose </th>
+            {% for column in columns %}
+            <th> {{ column }} </th>
+            {% endfor %}
+        </tr>
+        {% for object in objects %}
+        <tr>
+            <td> <input type="radio" name="object_id" value="{{ object.id }}" /></td>
+            <td> {{ object.name }} </td>
+            <td> {{ object.faculty.name }} </td>
+            <td> {{ object.degree }} </td>
+            <td> {{ object.howManySemesters }} </td>
+            <td> {{ object.type }} </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button class="btn background-second" type="submit" name="action" value="Delete"> Delete </button>
+    <button class="btn background-second" type="submit" name="action" value="Edit"> Edit </button>
+    <button class="btn background-second" type="submit" name="action" value="Add"> Add </button>
+</form>
+{% endwith %}
+{% endblock %}

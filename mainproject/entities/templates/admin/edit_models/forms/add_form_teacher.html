@@ -1,0 +1,45 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Edit admin </title>
+{% endblock %}
+{% block content %}
+<h1> Admin </h1>
+<form action="{% url 'entities:model_teacher' %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+            <table>
+                <tr>
+                    <td> Username </td>
+                    <td><input class="form-control" type="text" name="username" value=""></td>
+                </tr>
+                <tr>
+                    <td> Name </td>
+                    <td><input class="form-control" type="text" name="name" value=""></td>
+                </tr>
+                <tr>
+                    <td> Second Name </td>
+                    <td><input class="form-control" type="text" name="second_name" value=""></td>
+                </tr>
+                <tr>
+                    <td> Surname </td>
+                    <td><input class="form-control" type="text" name="surname" value=""></td>
+                </tr>
+                <tr>
+                    <td> Password </td>
+                    <td><input class="form-control" type="password" name="password" value=""></td>
+                </tr>
+                <tr>
+                    <td> Faculty </td>
+                    <td><select class="btn background-second" name="faculty">
+                        <option value="None"> --- choose --- </option>
+                        {% for faculty in faculties %}
+                            <option value="{{ faculty.id }}"> {{ faculty.name }} </option>
+                        {% endfor %}
+                    </select></td>
+                </tr>
+            </table>
+        </div>
+    <button class="btn background-second" type="submit" name="action" value="Do_add_teacher"> Add teacher </button>
+</form>
+{% endblock %}

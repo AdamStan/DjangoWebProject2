@@ -1,0 +1,76 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Generate plans </title>
+{% endblock %}
+{% block content %}
+<h1> Generate all plans </h1>
+<form action="{% url 'entities:generate' %}" method="post">
+    <div>
+      <p class="alert-success"> {{ s_message }} </p>
+    </div>
+    <div>
+      <p class="alert-danger"> {{ fail_message }} </p>
+    </div>
+    {% csrf_token %}
+    <div class="table-responsive">
+            <table>
+            <tr>
+                <td> First hour:  </td>
+                <td><input class="form-control" type="number" name="first_hour" min="1" max="22" value="8" placeholder="cannot be empty"/></td>
+            </tr>
+            <tr>
+                <td> Last hour: </td>
+                <td><input class="form-control" type="number" name="last_hour" min="1" max="23" value="19" placeholder="cannot be empty"/></td>
+            </tr>
+            <tr>
+                <td> Semester: </td>
+                <td>
+                    <select class="btn background-second" placeholder="choose semester" name="semester_type">
+                        <option value="1" selected="selected"> Winter </option>
+                        <option value="2"> Summer </option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td> How many groups for semester: </td>
+                <td><input class="form-control" type="number" name="how_many_groups" min="1" value="3"/></td>
+            </tr>
+            <tr>
+                <td> Do you want to delete a plans?  </td>
+                <td><input class="form-control-sm" type="checkbox" name="if_delete"/></td>
+            </tr>
+            <tr>
+                 <td><button class="btn background-second" type="submit" name="action" value="generate"> Generate </button></td>
+            </tr>
+        </table>
+    </div>
+</form>
+<br/>
+<h1> Improvements </h1>
+<form action="{% url 'entities:generate' %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+        <table>
+            <tr>
+                <td> How many tries: </td>
+                <td><input class="form-control" type="number" name="number_of_generation" min="1" max="20000" value="100" placeholder=""/></td>
+            </tr>
+            <tr>
+                <td><button class="btn background-second" type="submit" name="action" value="improve"> Improve </button></td>
+            </tr>
+        </table>
+    </div>
+</form>
+<h1> New semester</h1>
+<form action="{% url 'entities:generate' %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+        <table>
+            <tr>
+                <td><button class="btn background-second" type="submit" name="action" value="add_new_semestr"> Start new semester </button></td>
+            </tr>
+        </table>
+    </div>
+</form>
+{% endblock %}

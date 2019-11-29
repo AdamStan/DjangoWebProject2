@@ -1,0 +1,46 @@
+{% extends 'base_layout.html' %}
+{% load static from staticfiles %}
+{% block title %}
+<title> Edit teacher </title>
+{% endblock %}
+{% block content %}
+<h1> Teacher </h1>
+<form action="{% url 'entities:model_teacher' %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+            <table>
+                <tr>
+                    <td> Username </td>
+                    <td><input class="form-control" type="text" name="username" value="{{ teacher.user.username }}"></td>
+                </tr>
+                <tr>
+                    <td> Name </td>
+                    <td><input class="form-control" type="text" name="name" value="{{ teacher.user.name }}"></td>
+                </tr>
+                <tr>
+                    <td> Second Name </td>
+                    {% if teacher.user.second_name %}
+                    <td><input class="form-control" type="text" name="second_name" value="{{ teacher.user.second_name }}"></td>
+                    {% else %}
+                    <td><input class="form-control" type="text" name="second_name" value=""></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td> Surname </td>
+                    <td><input class="form-control" type="text" name="surname" value="{{ teacher.user.surname }}"></td>
+                </tr>
+                <tr>
+                    <td> Faculty </td>
+                    <td><select class="btn background-second" name="faculty">
+                        <option value="{{ teacher.faculty.id }}"> {{ teacher.faculty.name }} </option>
+                        {% for faculty in faculties %}
+                            <option value="{{ faculty.id }}"> {{ faculty.name }} </option>
+                        {% endfor %}
+                    </select></td>
+                </tr>
+                <input type="text" name="user_id" value="{{ teacher.user.id }}" hidden/>
+            </table>
+        </div>
+    <button class="btn background-second" type="submit" name="action" value="Update"> Update </button>
+</form>
+{% endblock %}
