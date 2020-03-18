@@ -3,8 +3,6 @@ from django.db.models import Max
 import json
 from accounts.models import User # it works, really
 
-var_on_delete = models.SET_NULL = True
-
 
 # Create your models here.
 class Faculty(models.Model):
@@ -24,7 +22,7 @@ class Faculty(models.Model):
 
 class FieldOfStudy(models.Model):
     name = models.CharField(max_length=64)
-    faculty = models.ForeignKey(Faculty, on_delete=var_on_delete, default=None)
+    faculty = models.ForeignKey(Faculty, on_delete=models.SET_NULL, default=None, null=True)
     BACHELOR = '1st'
     MASTER = '2nd'
     UNIFORM_MASTER_DEGREE = 'only-master'
@@ -77,7 +75,7 @@ class FieldOfStudy(models.Model):
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='professor_to_user')
-    faculty = models.ForeignKey(Faculty, on_delete=var_on_delete)
+    faculty = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True)
 
     def toJSON(self):
         return json.dumps(self.__dict__)
@@ -88,7 +86,7 @@ class Teacher(models.Model):
 
 class Subject(models.Model):
     name = models.CharField(max_length=128)
-    fieldOfStudy = models.ForeignKey(FieldOfStudy, on_delete=var_on_delete, default=None)
+    fieldOfStudy = models.ForeignKey(FieldOfStudy, on_delete=models.SET_NULL, default=None, null=True)
     semester = models.IntegerField(default=None)
     teachers = models.ManyToManyField(Teacher)
     lecture_hours = models.IntegerField(default=None, null=True)
@@ -129,7 +127,7 @@ class Building(models.Model):
 
 class Room(models.Model):
     id = models.CharField(primary_key=True, max_length=8)
-    building = models.ForeignKey(Building, on_delete=var_on_delete, null=True)
+    building = models.ForeignKey(Building, on_delete=models.SET_NULL, null=True)
     LECTURE = "LEC"
     LABORATORY = "LAB"
     TYPE_OF_ROOMS = (
@@ -155,7 +153,7 @@ class Room(models.Model):
 
 class Plan(models.Model):
     title = models.CharField(max_length=32)
-    fieldOfStudy = models.ForeignKey(FieldOfStudy, on_delete=var_on_delete, default=None)
+    fieldOfStudy = models.ForeignKey(FieldOfStudy, on_delete=models.SET_NULL, default=None, null=True)
     semester = models.IntegerField(default=1)
 
     def toJSON(self):
@@ -171,7 +169,7 @@ class Plan(models.Model):
 
 
 class ScheduledSubject(models.Model):
-    subject = models.ForeignKey(Subject, on_delete=var_on_delete, default=None)
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, default=None, null=True)
     LECTURE = "LEC"
     LABORATORY = "LAB"
     TYPE_CHOICES = (
@@ -188,9 +186,9 @@ class ScheduledSubject(models.Model):
     whenFinnish = models.TimeField(default=None, null=True)
     dayOfWeek = models.IntegerField(default=None, null=True)
     how_long = models.IntegerField(default=None, null=True)
-    plan = models.ForeignKey(Plan, on_delete=var_on_delete, default=None)
-    room = models.ForeignKey(Room, on_delete=var_on_delete, default=None, null=True)
-    teacher = models.ForeignKey(Teacher, on_delete=var_on_delete, default=None, null=True)
+    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, default=None, null=True)
+    room = models.ForeignKey(Room, on_delete=models.SET_NULL, default=None, null=True)
+    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, default=None, null=True)
 
     def toJSON(self):
         return json.dumps(self.__dict__)
@@ -208,9 +206,9 @@ class ScheduledSubject(models.Model):
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='student_to_user')
-    fieldOfStudy = models.ForeignKey(FieldOfStudy, on_delete=var_on_delete)
+    fieldOfStudy = models.ForeignKey(FieldOfStudy, on_delete=models.SET_NULL, null=True)
     semester = models.IntegerField(default=1)
-    plan = models.ForeignKey(Plan, on_delete=var_on_delete, default=None, null=True)
+    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, default=None, null=True)
     indexNumber = models.IntegerField(unique=True, default=1)
     isFinished = models.BooleanField(default=False)
 
