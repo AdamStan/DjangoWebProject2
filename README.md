@@ -8,12 +8,24 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to run the software is postgresql database. You can edit parameters to database in https://github.com/AdamStan/DjangoWebPortal/blob/master/mainproject/mainproject/settings.py
+What things you need to run the software is postgresql database and pg_config. You can edit parameters to database in mainproject/settings.py
+You also need python3 and pip.
 
 ### Installing
 
-Run quickly comand (of course you have to build venv with django in version 2.doesntmatter)
-
+Build virtual environment with this command:
+```
+python3 -m venv ./venv
+```
+You have to activate it with command:
+```
+. venv/bin/activate
+```
+and then install all requirements:
+```
+pip install -r requirements.txt
+```
+and then (last, I swear) run command:
 ```
 python manage.py migrate
 ```
@@ -26,12 +38,12 @@ python manage.py shell
 
 and put this commands:
 
-```
->>> from accounts.add_data import add_data
->>> from entities.add_data import add_entities
->>> add_data()
->>> add_entities()
->>> quit()
+```python
+from accounts.add_data import add_data
+from entities.add_data import add_entities
+add_data()
+add_entities()
+quit()
 ```
 
 Now you can run it using:
