@@ -1,16 +1,16 @@
 from datetime import time, datetime
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect
-from .models import Student, Teacher, Plan, ScheduledSubject, Room
-from .algorithm import ImprovementHelper
-from .improvement import make_improvement
+from ..models import Student, Teacher, Plan, ScheduledSubject, Room
+from ..algorithm import ImprovementHelper
+from ..improvement import make_improvement
 from django.http import HttpResponse
 import json
 from plans.runner import CreatePlanManager
-from .models import FieldOfStudy
+from ..models import FieldOfStudy
 from multiprocessing import Lock
+from .security import *
 
-forbidden = "/entities/forbidden/"
 main_lock = Lock()
 
 
@@ -28,19 +28,7 @@ class TeacherBox:
     id = 0
     title = ""
 
-""" --- TESTS FOR USER --- """
-def test_user_is_student(user):
-    return user.student
-
-
-def test_user_is_teacher(user):
-    return user.teacher
-
-
-def test_user_is_admin(user):
-    return user.admin
-
-
+# TODO: Move help functions to diff files!!
 def create_table_example():
     values = []
     return {'values': values}
@@ -121,7 +109,7 @@ def create_table_for_room(room_id):
 
 """ ::: VIEWS FOR ADMINS ::: """
 
-
+# TODO: split shows to files -> in views directory
 def show_student_plans(request):
     plans = get_plans()
     plan_title = ""
