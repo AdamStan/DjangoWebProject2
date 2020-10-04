@@ -59,11 +59,6 @@ def create_table(plan_id):
     return {"values": values}, plan.title
 
 
-def get_teachers():
-    teacher = Teacher.objects.all()
-    return teacher
-
-
 def create_table_for_teacher(teacher_id):
     teacher = Teacher.objects.get(user_id=teacher_id)
     subjects = ScheduledSubject.objects.filter(teacher=teacher).order_by('dayOfWeek')
@@ -129,7 +124,7 @@ def show_student_plans(request):
 
 
 def show_teachers_plans(request):
-    teachers = get_teachers()
+    teachers = Teacher.objects.all()
     plan_title = "Example"
     if request.method == 'POST':
         value = request.POST.get('plan_id', None)
@@ -159,55 +154,56 @@ def show_rooms_plans(request):
 def show_forbidden(request):
     return render(request, 'forbidden.html')
 
+#
+# @user_passes_test(test_user_is_admin, login_url=forbidden)
+# def show_generate_page(request):
+#     main_lock.acquire()
+#     fail_message = ""
+#     s_message = ""
+#     try:
+#         if request.method == 'POST':
+#             if request.POST.get('action') == "generate":
+#                 min_hour = request.POST.get("first_hour")
+#                 max_hour = request.POST.get("last_hour")
+#                 semester_type = request.POST.get("semester_type")
+#                 how_many_groups = request.POST.get("how_many_groups")
+#                 delete_on = request.POST.get('if_delete')
+#                 if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "":
+#                     fail_message = "Plans cannot be create with this values "
+#                 else:
+#                     print(delete_on)
+#                     # try:
+#                     cpm = CreatePlanManager()
+#                     if delete_on:
+#                         cpm.create_plan_asynch(winterOrSummer=FieldOfStudy.SUMMER, how_many_plans=int(how_many_groups), min_hour=int(min_hour), max_hour=int(max_hour))
+#                         cpm.save_the_best_result()
+#                     else:
+#                         # create_plans_without_delete
+#                         cpm.create_plan_asynch_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
+#                         cpm.save_the_best_result()
+#
+#                     if not cpm.the_best_result:
+#                         fail_message = "Something went wrong, please try again"
+#                     else:
+#                         s_message = "Everything went well, check plans in AllPlans tab"
+#
+#             elif request.POST.get('action') == "improve":
+#                 number_of_generations = request.POST.get('number_of_generation')
+#                 make_improvement(int(number_of_generations))
+#                 s_message = "Algorithm made improvement to the plans"
+#             elif request.POST.get('action') == "add_new_semestr":
+#                 students = Student.objects.all()
+#                 for student in students:
+#                     if student.semester == student.fieldOfStudy.howManySemesters and not student.isFinished:
+#                         student.isFinished = True
+#                     elif student.semester < student.fieldOfStudy.howManySemesters:
+#                         student.semester += 1
+#                     student.save()
+#                 s_message = "New semester has been started"
+#         return render(request, 'admin/generate.html', {"fail_message": fail_message, "s_message": s_message})
+#     finally:
+#         main_lock.release()
 
-@user_passes_test(test_user_is_admin, login_url=forbidden)
-def show_generate_page(request):
-    main_lock.acquire()
-    fail_message = ""
-    s_message = ""
-    try:
-        if request.method == 'POST':
-            if request.POST.get('action') == "generate":
-                min_hour = request.POST.get("first_hour")
-                max_hour = request.POST.get("last_hour")
-                semester_type = request.POST.get("semester_type")
-                how_many_groups = request.POST.get("how_many_groups")
-                delete_on = request.POST.get('if_delete')
-                if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "":
-                    fail_message = "Plans cannot be create with this values "
-                else:
-                    print(delete_on)
-                    # try:
-                    cpm = CreatePlanManager()
-                    if delete_on:
-                        cpm.create_plan_asynch(winterOrSummer=FieldOfStudy.SUMMER, how_many_plans=int(how_many_groups), min_hour=int(min_hour), max_hour=int(max_hour))
-                        cpm.save_the_best_result()
-                    else:
-                        # create_plans_without_delete
-                        cpm.create_plan_asynch_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
-                        cpm.save_the_best_result()
-
-                    if not cpm.the_best_result:
-                        fail_message = "Something went wrong, please try again"
-                    else:
-                        s_message = "Everything went well, check plans in AllPlans tab"
-
-            elif request.POST.get('action') == "improve":
-                number_of_generations = request.POST.get('number_of_generation')
-                make_improvement(int(number_of_generations))
-                s_message = "Algorithm made improvement to the plans"
-            elif request.POST.get('action') == "add_new_semestr":
-                students = Student.objects.all()
-                for student in students:
-                    if student.semester == student.fieldOfStudy.howManySemesters and not student.isFinished:
-                        student.isFinished = True
-                    elif student.semester < student.fieldOfStudy.howManySemesters:
-                        student.semester += 1
-                    student.save()
-                s_message = "New semester has been started"
-        return render(request, 'admin/generate.html', {"fail_message": fail_message, "s_message": s_message})
-    finally:
-        main_lock.release()
 
 @user_passes_test(test_user_is_admin, login_url="/entities/forbidden/")
 def show_edit_timetable(request):
@@ -343,8 +339,7 @@ def show_choose_plan(request):
     student_id = request.user.id
     student = Student.objects.get(user_id=student_id) # add student id
     plans = Plan.objects.filter(fieldOfStudy = student.fieldOfStudy, semester = student.semester)
-    #temp_field = FieldOfStudy.objects.get(id=7)
-    #plans = Plan.objects.filter(fieldOfStudy=temp_field, semester=1)
+
     plan_id = plans.first().id
     parameters, plan_title = create_table(plans.first().id)
 
