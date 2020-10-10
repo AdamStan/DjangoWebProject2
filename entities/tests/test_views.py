@@ -1,5 +1,3 @@
-from django.test import TestCase
-from django.test import Client
 from ..views import *
 from .test_entities import AbstractTestEntities
 
@@ -19,13 +17,13 @@ class TestViews(AbstractTestEntities):
         self.assertIsNone(value)
 
     def test_create_table_example(self):
-        plans = get_plans()
+        plans = Plan.objects.all()
         self.assertIsNotNone(plans[0])
 
     def test_create_table_for_room(self):
         plan = Plan.objects.all()[0]
         values, plan_name_db = create_table(plan.id)
-        self.assertNotEqual( [], values["values"] )
+        self.assertNotEqual([], values["values"])
         self.assertEqual("CS1_01", plan_name_db, "This is not plan we are looking for")
 
     def test_create_table_for_teacher(self):
