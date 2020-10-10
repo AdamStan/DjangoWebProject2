@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
 <h1> Generate all plans </h1>
-<form action="{% url 'entities:generate' %}" method="post">
+<form action="{% url 'entities:make_generate' %}" method="post">
     <div>
       <p class="alert-success"> {{ s_message }} </p>
     </div>
@@ -48,7 +48,7 @@
 </form>
 <br/>
 <h1> Improvements </h1>
-<form action="{% url 'entities:generate' %}" method="post">
+<form action="{% url 'entities:improvement' %}" method="post">
     {% csrf_token %}
     <div class="table-responsive">
         <table>
@@ -63,7 +63,7 @@
     </div>
 </form>
 <h1> New semester</h1>
-<form action="{% url 'entities:generate' %}" method="post">
+<form action="{% url 'entities:new_semester' %}" method="post">
     {% csrf_token %}
     <div class="table-responsive">
         <table>

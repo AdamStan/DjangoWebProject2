@@ -1,7 +1,7 @@
 import traceback
 from multiprocessing import Pool
 from entities.models import Teacher, Room, FieldOfStudy, Plan, ScheduledSubject
-from .algorithm import OnePlanGenerator
+from .algorithms import OnePlanGenerator
 
 def run_it_in_shell():
     cpm = CreatePlanManager()

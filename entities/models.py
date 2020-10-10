@@ -46,18 +46,6 @@ class FieldOfStudy(models.Model):
         default=WINTER
     )
 
-    # def compare_to(self, other):
-    #     return self.name == other.name and \
-    #            self.faculty == other.faculty and \
-    #            self.degree == other.degree and \
-    #            self.type == other.type and \
-    #            self.howManySemesters == other.howManySemesters and \
-    #            self.whenDoesItStarts == other.whenDoesItStarts
-    #
-    # def __hash__(self):
-    #     return hash(self.name) + hash(self.faculty) + hash(self.degree) + hash(self.type) \
-    #            + hash(self.howManySemesters) + hash(self.whenDoesItStarts)
-
     def compare_to(self, other):
         return self.name == other.name and \
                self.faculty.compare_to(other.faculty) and \

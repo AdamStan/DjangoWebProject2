@@ -112,9 +112,6 @@ class ImprovementManagerQuerySets:
             print(str(e))
             raise e
 
-    def steps_for_lecture(self):
-        pass
-
     def steps_for_laboratory(self, min_hour, max_hour, value_before, subject_to_change, plan_to_change):
         """
         :param min_hour:
