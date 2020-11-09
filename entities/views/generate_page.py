@@ -27,25 +27,26 @@ def action_generate(request):
         semester_type = request.POST.get("semester_type")
         how_many_groups = request.POST.get("how_many_groups")
         delete_on = request.POST.get('if_delete')
+        alogrithm_name = request.POST.get("alogrithm")
         if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "":
             fail_message = "Plans cannot be create with this values "
         else:
             print(delete_on)
-            # try:
-            cpm = CreatePlanManager()
-            if delete_on:
-                cpm.create_plan_asynch(winterOrSummer=FieldOfStudy.SUMMER, how_many_plans=int(how_many_groups),
-                                       min_hour=int(min_hour), max_hour=int(max_hour))
-                cpm.save_the_best_result()
-            else:
-                # create_plans_without_delete
-                cpm.create_plan_asynch_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
-                cpm.save_the_best_result()
+            # TODO: temporary switched off
+            # cpm = CreatePlanManager()
+            # if delete_on:
+            #     cpm.create_plan_asynch(winterOrSummer=FieldOfStudy.SUMMER, how_many_plans=int(how_many_groups),
+            #                            min_hour=int(min_hour), max_hour=int(max_hour))
+            #     cpm.save_the_best_result()
+            # else:
+            #     # create_plans_without_delete
+            #     cpm.create_plan_asynch_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
+            #     cpm.save_the_best_result()
 
-            if not cpm.the_best_result:
-                fail_message = "Something went wrong, please try again"
-            else:
-                s_message = "Everything went well, check plans in AllPlans tab"
+            # if not cpm.the_best_result:
+            #     fail_message = "Something went wrong, please try again"
+            # else:
+            #     s_message = "Everything went well, check plans in AllPlans tab"
         return show_generate_page(request, fail_message, s_message)
     finally:
         main_lock.release()
@@ -53,6 +54,10 @@ def action_generate(request):
 
 @user_passes_test(test_user_is_admin, login_url=forbidden)
 def action_improve(request):
+    """
+    TODO: Remove - action improvement will be not allowed!
+    Generation with improvement will be one of tested algorithms
+    """
     global main_lock
     main_lock.acquire()
 
