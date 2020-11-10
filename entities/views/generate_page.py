@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect
 from ..models import Student
-from ..improvement import make_improvement
+from plans.algorithms.improvement import make_improvement
 from plans.runner import CreatePlanManager
 from ..models import FieldOfStudy
 from multiprocessing import Lock
@@ -22,31 +22,34 @@ def action_generate(request):
     fail_message = ""
     s_message = ""
     try:
+        # basic parameters
         min_hour = request.POST.get("first_hour")
         max_hour = request.POST.get("last_hour")
         semester_type = request.POST.get("semester_type")
         how_many_groups = request.POST.get("how_many_groups")
         delete_on = request.POST.get('if_delete')
-        alogrithm_name = request.POST.get("alogrithm")
-        if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "":
+        algorithm_name = request.POST.get("algorithm")
+
+        if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "" or alogrithm_name == "":
             fail_message = "Plans cannot be create with this values "
         else:
             print(delete_on)
+            print(algorithm_name)
             # TODO: temporary switched off
-            # cpm = CreatePlanManager()
-            # if delete_on:
-            #     cpm.create_plan_asynch(winterOrSummer=FieldOfStudy.SUMMER, how_many_plans=int(how_many_groups),
-            #                            min_hour=int(min_hour), max_hour=int(max_hour))
-            #     cpm.save_the_best_result()
-            # else:
-            #     # create_plans_without_delete
-            #     cpm.create_plan_asynch_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
-            #     cpm.save_the_best_result()
+            plan_creator = CreatePlanManager()
+            if delete_on:
+                cpm.create_plan_asynch(winterOrSummer=FieldOfStudy.SUMMER, how_many_plans=int(how_many_groups),
+                                       min_hour=int(min_hour), max_hour=int(max_hour))
+                cpm.save_the_best_result()
+            else:
+                # create_plans_without_delete
+                cpm.create_plan_asynch_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
+                cpm.save_the_best_result()
 
-            # if not cpm.the_best_result:
-            #     fail_message = "Something went wrong, please try again"
-            # else:
-            #     s_message = "Everything went well, check plans in AllPlans tab"
+            if not cpm.the_best_result:
+                fail_message = "Something went wrong, please try again"
+            else:
+                s_message = "Everything went well, check plans in AllPlans tab"
         return show_generate_page(request, fail_message, s_message)
     finally:
         main_lock.release()

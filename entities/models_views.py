@@ -2,7 +2,7 @@ from datetime import time
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from setuptools.command.rotate import rotate
-from .algorithm import ImprovementHelper
+from plans.algorithms import ImprovementHelper
 from .views import test_user_is_admin, forbidden
 from accounts.models import User, UserManager
 from .models import *

@@ -1,7 +1,7 @@
 import traceback
 from multiprocessing import Pool
 from entities.models import Teacher, Room, FieldOfStudy, Plan, ScheduledSubject
-from .algorithms import OnePlanGenerator
+from .algorithms import RandomPlanGenerator
 
 def run_it_in_shell():
     cpm = CreatePlanManager()
@@ -23,10 +23,10 @@ class CreatePlanManager():
         connection.close()
         result = {"Exception"}
         try:
-            plans = OnePlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winterOrSummer)
+            plans = RandomPlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winterOrSummer)
             # OnePlanGenerator.show_objects(plans)
             # in test purpose only!!!
-            first_plan = OnePlanGenerator(teachers, plans, rooms)
+            first_plan = RandomPlanGenerator(teachers, plans, rooms)
             result = first_plan.generate_plan(min_hour, max_hour)
         except Exception as e:
             print(e)
@@ -41,7 +41,7 @@ class CreatePlanManager():
         try:
             # OnePlanGenerator.show_objects(plans)
             # in test purpose only!!!
-            first_plan = OnePlanGenerator(teachers=teachers, plans=plans, rooms=rooms, scheduled_subjects_in_plans=scheduled_subjects_list)
+            first_plan = RandomPlanGenerator(teachers=teachers, plans=plans, rooms=rooms, scheduled_subjects_in_plans=scheduled_subjects_list)
             result = first_plan.generate_plan(min_hour, max_hour)
         except Exception as ex:
             print(ex)
@@ -71,7 +71,7 @@ class CreatePlanManager():
         scheduled_subjects_list = []
         for plan in plans:
             bullshit = plan.fieldOfStudy.faculty
-            scheduled_subjects = OnePlanGenerator.create_scheduled_subjects(plan, 15)
+            scheduled_subjects = RandomPlanGenerator.create_scheduled_subjects(plan, 15)
             scheduled_subjects_list.append(scheduled_subjects)
         list_with_arguments = []
         for i in range(10):

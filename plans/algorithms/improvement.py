@@ -4,7 +4,7 @@ from random import randint, choice
 from datetime import time
 from copy import deepcopy
 from .algorithm import ImprovementHelper
-from .models import Room, Teacher, ScheduledSubject, Plan
+from entities.models import Room, Teacher, ScheduledSubject, Plan
 
 
 class ImprovementManagerQuerySets:

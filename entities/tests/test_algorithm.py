@@ -1,6 +1,6 @@
 from .test_entities import AbstractTestEntities
 from ..models import ScheduledSubject, Plan
-from ..algorithm import ImprovementHelper
+from plans.algorithms import ImprovementHelper
 
 
 class TestImprovementHelper(AbstractTestEntities):

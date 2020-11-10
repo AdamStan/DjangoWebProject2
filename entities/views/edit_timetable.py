@@ -2,7 +2,7 @@ from datetime import time, datetime
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect
 from ..models import Student, Teacher, Plan, ScheduledSubject, Room
-from ..algorithm import ImprovementHelper
+from plans.algorithms import ImprovementHelper
 from django.http import HttpResponse
 from .security import *
 from .utilities import *

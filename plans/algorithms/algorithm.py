@@ -1,4 +1,4 @@
-from .models import ScheduledSubject, Plan, FieldOfStudy, Subject, Room, Teacher, Student
+from entities.models import ScheduledSubject, Plan, FieldOfStudy, Subject, Room, Teacher, Student
 from random import randint, choice
 from datetime import time
 from django.db import transaction

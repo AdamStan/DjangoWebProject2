@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render, redirect
-from ..models import Student, Teacher, Plan, ScheduledSubject, Room
-import json
+from django.shortcuts import render
+from entities.models import Student
 from multiprocessing import Lock
 from .security import *
 from .utilities import *

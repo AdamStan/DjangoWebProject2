@@ -19,17 +19,17 @@ def create_plan(winterOrSummer=FieldOfStudy.WINTER, how_many_plans=3):
     print("--> I'VE TAKEN WITH SUCCESS")
     result = ["Exception"]
     try:
-        plans = OnePlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winterOrSummer)
+        plans = RandomPlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winterOrSummer)
         # OnePlanGenerator.show_objects(plans)
         # in test purpose only!!!
-        first_plan = OnePlanGenerator(teachers, plans, rooms)
+        first_plan = RandomPlanGenerator(teachers, plans, rooms)
         result = first_plan.generate_plan()
     except:
         print("Exception was thrown")
     return result
 
 
-class OnePlanGenerator:
+class RandomPlanGenerator:
     def __init__(self, teachers, plans=None, rooms=None, scheduled_subjects_in_plans=None,
                  how_many_plans=3, winterOrSummer=FieldOfStudy.WINTER, weeks=15):
         self.teachers = list(teachers)
@@ -43,9 +43,9 @@ class OnePlanGenerator:
             self.subjects_in_plans = scheduled_subjects_in_plans
         else:
             fields_of_study = FieldOfStudy.objects.all()
-            self.plans = OnePlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winterOrSummer)
+            self.plans = RandomPlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winterOrSummer)
             for plan in self.plans:
-                scheduled_subjects = OnePlanGenerator.create_scheduled_subjects(plan, weeks)
+                scheduled_subjects = RandomPlanGenerator.create_scheduled_subjects(plan, weeks)
                 self.subjects_in_plans.append(scheduled_subjects)
 
         self.rooms = list(rooms)
@@ -186,7 +186,7 @@ class OnePlanGenerator:
                     break
                 rooms.remove(room)
             if len(rooms) == 0:
-                OnePlanGenerator.show_subjects(list(filter(lambda x: (x.room_type == Room.LECTURE), self.rooms)))
+                RandomPlanGenerator.show_subjects(list(filter(lambda x: (x.room_type == Room.LECTURE), self.rooms)))
                 raise Exception("lectures cannot be set!")
 
     def set_rooms_for_laboratories(self):
@@ -206,9 +206,9 @@ class OnePlanGenerator:
                     if key.room_type == Room.LABORATORY:
                         print("***")
                         print(key)
-                        OnePlanGenerator.show_subjects(list_dupa)
+                        RandomPlanGenerator.show_subjects(list_dupa)
                 print("Chujowy przedmiot:")
-                OnePlanGenerator.show_subjects([sch_subject])
+                RandomPlanGenerator.show_subjects([sch_subject])
                 raise Exception("laboratories cannot be set!")
 
     def set_teachers_to_class(self):
@@ -229,7 +229,7 @@ class OnePlanGenerator:
                     break
                 teachers.remove(teacher)
             if len(teachers) == 0:
-                OnePlanGenerator.show_subjects(sch_subject_list[0].subject.teachers.all())
+                RandomPlanGenerator.show_subjects(sch_subject_list[0].subject.teachers.all())
                 raise Exception("lectures cannot be set!")
 
     def teachers_to_labs(self):
@@ -244,7 +244,7 @@ class OnePlanGenerator:
                     break
                 teachers.remove(teacher)
             if len(teachers) == 0:
-                OnePlanGenerator.show_objects(sch_subject.subject.teachers.all())
+                RandomPlanGenerator.show_objects(sch_subject.subject.teachers.all())
                 raise Exception("laboratories cannot be set!")
 
     def check_teacher_can_teach(self, teacher, sch_subject):
