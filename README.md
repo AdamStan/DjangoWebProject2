@@ -9,7 +9,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 What things you need to run the software is postgresql database and pg_config. You can edit parameters to database in mainproject/settings.py
-You also need python3 and pip.
+You also need python3 and pip.(*)
 
 ### Installing
 
@@ -25,7 +25,7 @@ and then install all requirements:
 ```
 pip install -r requirements.txt
 ```
-and then (last, I swear) run command:
+and then (last, I swear) run commands:
 ```
 python manage.py migrate
 ```
@@ -43,7 +43,6 @@ from accounts.add_data import add_data
 from entities.add_data import add_entities
 add_data()
 add_entities()
-quit()
 ```
 
 Now you can run it using:
@@ -80,3 +79,10 @@ Don't pay, get for free.
 
 * Hat tip to anyone whose code was used: many websites
 * Inspiration: I've hated plans for laboratory's groups at my university. Now I know that it is hard to be good for everyone :-(
+
+
+## (*) Postgresql installation
+
+On windows postgresql installation and project configuration is easy as f*ck, but on
+Fedora I had more than just one problem so I've added script to run and install on Fedora
+(yes, it won't work on debian's systems). The script contains comments, please read them.
