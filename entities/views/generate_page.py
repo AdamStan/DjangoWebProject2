@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect
 from ..models import Student
 from plans.algorithms.improvement import make_improvement
-from plans.runner import CreatePlanManager
+from plans.runner import PlanCreatorProvider
 from ..models import FieldOfStudy
 from multiprocessing import Lock
 from .security import *
@@ -30,23 +30,23 @@ def action_generate(request):
         delete_on = request.POST.get('if_delete')
         algorithm_name = request.POST.get("algorithm")
 
-        if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "" or alogrithm_name == "":
+        if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "" or algorithm_name == "":
             fail_message = "Plans cannot be create with this values "
         else:
             print(delete_on)
             print(algorithm_name)
-            # TODO: temporary switched off
-            plan_creator = CreatePlanManager()
-            if delete_on:
-                cpm.create_plan_asynch(winterOrSummer=FieldOfStudy.SUMMER, how_many_plans=int(how_many_groups),
-                                       min_hour=int(min_hour), max_hour=int(max_hour))
-                cpm.save_the_best_result()
-            else:
-                # create_plans_without_delete
-                cpm.create_plan_asynch_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
-                cpm.save_the_best_result()
 
-            if not cpm.the_best_result:
+            plan_creator = PlanCreatorProvider().provider_creator(algorithm_name=algorithm_name)
+            if delete_on:
+                plan_creator.create_plan_async(winter_or_summer=FieldOfStudy.SUMMER,
+                                               how_many_plans=int(how_many_groups),
+                                               min_hour=int(min_hour), max_hour=int(max_hour))
+                plan_creator.save_the_best_result()
+            else:
+                plan_creator.create_plan_async_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
+                plan_creator.save_the_best_result()
+
+            if not plan_creator.the_best_result:
                 fail_message = "Something went wrong, please try again"
             else:
                 s_message = "Everything went well, check plans in AllPlans tab"

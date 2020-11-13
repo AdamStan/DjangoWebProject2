@@ -10,7 +10,7 @@ check it can be with other room's subjects
 '''
 
 
-class ImprovementHelper():
+class ImprovementHelper:
     # TODO: this logic should be in Directory class!!!
     bachelor_semesters = [1, 2, 3, 4, 5, 6, 7]
     master_semesters = [1, 2, 3]

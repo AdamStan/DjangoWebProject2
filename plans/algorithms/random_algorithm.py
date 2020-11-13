@@ -1,37 +1,20 @@
-from entities.models import Subject, ScheduledSubject, Teacher, Plan, Room, FieldOfStudy
-from multiprocessing import Process as MProcess
+from entities.models import ScheduledSubject, Teacher, Plan, Room, FieldOfStudy
 from random import randint, choice
 from datetime import time
+from .algorithms_helper import create_scheduled_subjects, create_empty_plans, show_objects, show_subjects
+from multiprocessing import Pool
 
 # :::STATIC VALUES:::
 HOW_MANY_TRIES = 100
 
-''' 
-IN TEST PURPOSE ONLY
-It will be request function:
-'''
-
-def create_plan(winterOrSummer=FieldOfStudy.WINTER, how_many_plans=3):
-    print("--> I GET ALL FROM DATABASE")
-    teachers = Teacher.objects.all()
-    rooms = Room.objects.all()
-    fields_of_study = FieldOfStudy.objects.all()
-    print("--> I'VE TAKEN WITH SUCCESS")
-    result = ["Exception"]
-    try:
-        plans = RandomPlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winterOrSummer)
-        # OnePlanGenerator.show_objects(plans)
-        # in test purpose only!!!
-        first_plan = RandomPlanGenerator(teachers, plans, rooms)
-        result = first_plan.generate_plan()
-    except:
-        print("Exception was thrown")
-    return result
-
 
 class RandomPlanGenerator:
+    """
+    Can be used to create one plan
+    """
+
     def __init__(self, teachers, plans=None, rooms=None, scheduled_subjects_in_plans=None,
-                 how_many_plans=3, winterOrSummer=FieldOfStudy.WINTER, weeks=15):
+                 how_many_plans=3, winter_or_summer=FieldOfStudy.WINTER, weeks=15):
         self.teachers = list(teachers)
         # there will be the same index as in plans, teachers, rooms
         self.subjects_in_plans = []
@@ -43,9 +26,9 @@ class RandomPlanGenerator:
             self.subjects_in_plans = scheduled_subjects_in_plans
         else:
             fields_of_study = FieldOfStudy.objects.all()
-            self.plans = RandomPlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winterOrSummer)
+            self.plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
             for plan in self.plans:
-                scheduled_subjects = RandomPlanGenerator.create_scheduled_subjects(plan, weeks)
+                scheduled_subjects = create_scheduled_subjects(plan, weeks)
                 self.subjects_in_plans.append(scheduled_subjects)
 
         self.rooms = list(rooms)
@@ -57,47 +40,12 @@ class RandomPlanGenerator:
             self.subjects_for_teachers[teacher] = []
         print("Initialize with success")
 
-    @staticmethod
-    def create_empty_plans(fields_of_study, how_many_plans, winter_or_summer):
-        plans = []
-
-        for field in fields_of_study:
-            if field.whenDoesItStarts == winter_or_summer:
-                sm = 1
-            else:
-                sm = 2
-            for sem in range(sm, field.howManySemesters + 1, 2):
-                for i in range(1, how_many_plans + 1):
-                    title_of_plan = field.name + str(sem) + "_" + str(i) + "|" + field.degree
-                    plans.append(Plan(title=title_of_plan, fieldOfStudy=field, semester=sem))
-        return plans
-
-    @staticmethod
-    def create_scheduled_subjects(plan, weeks):
-        subjects = Subject.objects.filter(fieldOfStudy=plan.fieldOfStudy, semester=plan.semester)
-        list_of_scheduled_subjects = []
-        for subject in subjects:
-            bullshit = subject.fieldOfStudy.faculty
-            if subject.lecture_hours and subject.lecture_hours > 0:
-                list_of_scheduled_subjects.append(
-                    ScheduledSubject(subject=subject, plan=plan, type=ScheduledSubject.LECTURE,
-                                     how_long=int(subject.lecture_hours / weeks))
-                )
-            if subject.laboratory_hours and subject.laboratory_hours > 0:
-                list_of_scheduled_subjects.append(
-                    ScheduledSubject(subject=subject, plan=plan, type=ScheduledSubject.LABORATORY,
-                                     how_long=int(subject.laboratory_hours / weeks))
-                )
-        return list_of_scheduled_subjects
-
-    def generate_plan(self, min_hour=8, max_hour=19, days=[1,2,3,4,5]):
+    def generate_plan(self, min_hour=8, max_hour=19, days=[1, 2, 3, 4, 5]):
         """
         Creates timetable first time
-        :param scheduled_subjects: subjects without schedule
         :param min_hour: first hour when subject can start
         :param max_hour: last hour when subject can start
         :param days: days in week 0 => sunday, 6=> saturday
-        :param weeks: how many weeks semester can be
         :return: None
         """
         self.set_lectures_time(min_hour=min_hour, max_hour=max_hour, days=days)
@@ -106,14 +54,12 @@ class RandomPlanGenerator:
         self.set_teachers_to_class()
         return [self, self.calculate_value()]
 
-    def set_lectures_time(self, min_hour=8, max_hour=19, days=[1,2,3,4,5]):
+    def set_lectures_time(self, min_hour=8, max_hour=19, days=[1, 2, 3, 4, 5]):
         """
         Randomizes days of week and hours when lectures will take place
-        :param scheduled_subjects: subjects without schedule
         :param min_hour: first hour when subject can start
         :param max_hour: last hour when subject can start
         :param days: days in week 0 => sunday, 6=> saturday
-        :param weeks: how many weeks semester can be
         :return None:
         """
         print("--- set lectures time ---")
@@ -131,7 +77,8 @@ class RandomPlanGenerator:
                     if value.compare_to(sch_subject_list[0]):
                         check_for_this_key = key
                         break
-                if self.check_event_can_be_set(event=sch_subject_list[0], event_id=check_for_this_key, dict_of_subjects=dict_lectures):
+                if self.check_event_can_be_set(event=sch_subject_list[0], event_id=check_for_this_key,
+                                               dict_of_subjects=dict_lectures):
                     for sch_subject in sch_subject_list:
                         sch_subject.whenStart = time(when_start, 0, 0)
                         sch_subject.dayOfWeek = which_day
@@ -141,14 +88,12 @@ class RandomPlanGenerator:
             if tries == 0:
                 raise Exception("lectures cannot be set!")
 
-    def set_laboratory_time(self, min_hour=8, max_hour=19, days=[1,2,3,4,5]):
+    def set_laboratory_time(self, min_hour=8, max_hour=19, days=[1, 2, 3, 4, 5]):
         """
         Randomizes days of week and hours when lectures will take place
-        :param scheduled_subjects: subjects without schedule
         :param min_hour: first hour when subject can start
         :param max_hour: last hour when subject can start
         :param days: days in week 0 => sunday, 6=> saturday
-        :param weeks: how many weeks semester can be
         :return None:
         """
         dict_laboratories, dict_all = self.prepare_laboratories()
@@ -186,7 +131,7 @@ class RandomPlanGenerator:
                     break
                 rooms.remove(room)
             if len(rooms) == 0:
-                RandomPlanGenerator.show_subjects(list(filter(lambda x: (x.room_type == Room.LECTURE), self.rooms)))
+                show_subjects(list(filter(lambda x: (x.room_type == Room.LECTURE), self.rooms)))
                 raise Exception("lectures cannot be set!")
 
     def set_rooms_for_laboratories(self):
@@ -202,13 +147,13 @@ class RandomPlanGenerator:
                     break
                 rooms.remove(room)
             if len(rooms) == 0:
-                for key, list_dupa in self.subjects_in_room.items():
+                for key, list_with_error in self.subjects_in_room.items():
                     if key.room_type == Room.LABORATORY:
                         print("***")
                         print(key)
-                        RandomPlanGenerator.show_subjects(list_dupa)
-                print("Chujowy przedmiot:")
-                RandomPlanGenerator.show_subjects([sch_subject])
+                        show_subjects(list_with_error)
+                print("Nieladny przedmiot:")
+                show_subjects([sch_subject])
                 raise Exception("laboratories cannot be set!")
 
     def set_teachers_to_class(self):
@@ -229,7 +174,7 @@ class RandomPlanGenerator:
                     break
                 teachers.remove(teacher)
             if len(teachers) == 0:
-                RandomPlanGenerator.show_subjects(sch_subject_list[0].subject.teachers.all())
+                show_subjects(sch_subject_list[0].subject.teachers.all())
                 raise Exception("lectures cannot be set!")
 
     def teachers_to_labs(self):
@@ -244,7 +189,7 @@ class RandomPlanGenerator:
                     break
                 teachers.remove(teacher)
             if len(teachers) == 0:
-                RandomPlanGenerator.show_objects(sch_subject.subject.teachers.all())
+                show_objects(sch_subject.subject.teachers.all())
                 raise Exception("laboratories cannot be set!")
 
     def check_teacher_can_teach(self, teacher, sch_subject):
@@ -327,7 +272,7 @@ class RandomPlanGenerator:
             value += self.value_for_plan(sch_subject_list)
         return value
 
-    def value_for_plan(self, subjects_in_plan, days=[1,2,3,4,5]):
+    def value_for_plan(self, subjects_in_plan, days=[1, 2, 3, 4, 5]):
         """
         formula: days - empty days +  (end - start - all how long)
         :param subjects_in_plan:
@@ -377,13 +322,106 @@ class RandomPlanGenerator:
             for sch_subject in sch_subject_list:
                 sch_subject.save()
 
-    @staticmethod
-    def show_objects(objects):
-        for obj in objects:
-            print(str(obj))
 
-    @staticmethod
-    def show_subjects(scheduled_subjects):
-        for sch in scheduled_subjects:
-            print(str(sch) + ", " + str(sch.whenStart) + ", " + str(sch.whenFinnish) + ", day:" + str(sch.dayOfWeek)
-                  + ", how_long: " + str(sch.how_long))
+class RandomPlanAlgorithm:
+
+    def __init__(self):
+        self.the_best_result = None
+        self.results = []
+
+    def create_plan(self, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, teachers=None, rooms=None,
+                    fields_of_study=None, min_hour=8, max_hour=19):
+        from django.db import connection
+        connection.close()
+        result = {"Exception"}
+        try:
+            plans = RandomPlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
+            # OnePlanGenerator.show_objects(plans)
+            # in test purpose only!!!
+            first_plan = RandomPlanGenerator(teachers, plans, rooms)
+            result = first_plan.generate_plan(min_hour, max_hour)
+        except Exception as e:
+            print(e)
+            import traceback
+            traceback.print_tb(e.__traceback__)
+        return result
+
+    def create_plans_without_deleting_plans(self, teachers, rooms, plans, min_hour, max_hour, scheduled_subjects_list):
+        result = {"Exception"}
+        from django.db import connection
+        connection.close()
+        try:
+            # OnePlanGenerator.show_objects(plans)
+            # in test purpose only!!!
+            first_plan = RandomPlanGenerator(teachers=teachers, plans=plans, rooms=rooms,
+                                             scheduled_subjects_in_plans=scheduled_subjects_list)
+            result = first_plan.generate_plan(min_hour, max_hour)
+        except Exception as ex:
+            print(ex)
+            import traceback
+            traceback.print_tb(ex.__traceback__)
+            print("Exception was thrown")
+        return result
+
+    def create_plan_async(self, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, min_hour=8, max_hour=19):
+        pool = Pool(processes=4)
+        list_with_arguments = []
+        teachers = list(Teacher.objects.all())
+        rooms = list(Room.objects.all())
+        fields_of_study = list(FieldOfStudy.objects.all())
+        for i in range(10):
+            list_with_arguments.append((winter_or_summer, how_many_plans, teachers, rooms,
+                                        fields_of_study, min_hour, max_hour))
+        print("-> STARTS RUNNING ASYNCH")
+        self.results = pool.starmap(self.create_plan, list_with_arguments)
+        print(self.results)
+
+    def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
+        pool = Pool(processes=4)
+        teachers = list(Teacher.objects.all())
+        rooms = list(Room.objects.all())
+        plans = list(Plan.objects.all())
+        scheduled_subjects_list = []
+        for plan in plans:
+            bullshit = plan.fieldOfStudy.faculty
+            scheduled_subjects = create_scheduled_subjects(plan, 15)
+            scheduled_subjects_list.append(scheduled_subjects)
+        list_with_arguments = []
+        for i in range(10):
+            list_with_arguments.append((teachers, rooms, plans, min_hour, max_hour, scheduled_subjects_list))
+        print("-> STARTS RUNNING ASYNCH WITHOUT deleting")
+        self.results = pool.starmap(self.create_plans_without_deleting_plans, list_with_arguments)
+        print(self.results)
+
+    def find_the_best_result(self):
+        print("----- Show results -----")
+        the_best_result = None
+        for result in self.results:
+            if the_best_result and len(result) == 2:
+                if the_best_result[1] > result[1]:
+                    the_best_result = result
+            elif len(result) == 2:
+                the_best_result = result
+        print("The_best_result")
+        print(result)
+        return the_best_result
+
+    def save_the_best_result(self):
+        from django.db import connection
+        connection.close()
+        result_to_save = self.find_the_best_result()
+        if result_to_save:
+            plans = result_to_save[0].plans
+            sch_subject_plans = result_to_save[0].subjects_in_plans
+            ScheduledSubject.objects.all().delete()
+            Plan.objects.all().delete()
+            # SAVE
+            for plan in plans:
+                plan.save()
+            for i in range(len(plans)):
+                title = sch_subject_plans[i][0].plan.title
+                plan = Plan.objects.get(title=title)
+                for sch_subject in sch_subject_plans[i]:
+                    sch_subject.plan = plan
+                    sch_subject.save()
+            self.the_best_result = result_to_save

@@ -3,8 +3,8 @@ from numpy import array, zeros
 from random import randint, choice
 from datetime import time
 from copy import deepcopy
-from .algorithm import ImprovementHelper
-from entities.models import Room, Teacher, ScheduledSubject, Plan
+from .algorithms import ImprovementHelper
+from entities.models import Room, Teacher, ScheduledSubject, Plan, FieldOfStudy
 
 
 class ImprovementManagerQuerySets:
@@ -191,6 +191,7 @@ class ImprovementManagerQuerySets:
         print("Success (lab): " + str(self.success_lab))
         print("Success (lec): " + str(self.success_lec))
 
+
 def make_improvement(how_many=1):
     scheduled_subjects = ScheduledSubject.objects.all()
     rooms = Room.objects.all().order_by("id")
@@ -202,3 +203,16 @@ def make_improvement(how_many=1):
         instance.generation()
 
     instance.show_conclusion()
+
+
+# TODO: create plan with improvements!!!
+class ImprovementAlgorithm:
+
+    def create_plan_async(self, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, min_hour=8, max_hour=19):
+        pass
+
+    def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
+        pass
+
+    def save_the_best_result(self):
+        pass
