@@ -1,9 +1,8 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect
-from ..models import Student
 from plans.algorithms.improvement import make_improvement
-from plans.runner import PlanCreatorProvider
-from ..models import FieldOfStudy
+from plans.runner import provide_creator
+from ..models import FieldOfStudy, Student
 from multiprocessing import Lock
 from .security import *
 
@@ -36,7 +35,7 @@ def action_generate(request):
             print(delete_on)
             print(algorithm_name)
 
-            plan_creator = PlanCreatorProvider().provider_creator(algorithm_name=algorithm_name)
+            plan_creator = provide_creator(algorithm_name=algorithm_name)
             if delete_on:
                 plan_creator.create_plan_async(winter_or_summer=FieldOfStudy.SUMMER,
                                                how_many_plans=int(how_many_groups),

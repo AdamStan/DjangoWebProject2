@@ -1,3 +1,4 @@
+import logging as logger
 from django.db import transaction
 from numpy import array, zeros
 from random import randint, choice
@@ -215,4 +216,4 @@ class ImprovementAlgorithm:
         pass
 
     def save_the_best_result(self):
-        pass
+        logger.log(level=logger.INFO, msg="Improvement algorithm not supported yet")
