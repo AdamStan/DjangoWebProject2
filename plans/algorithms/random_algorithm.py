@@ -335,7 +335,7 @@ class RandomPlanAlgorithm:
         connection.close()
         result = {"Exception"}
         try:
-            plans = RandomPlanGenerator.create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
+            plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
             # OnePlanGenerator.show_objects(plans)
             # in test purpose only!!!
             first_plan = RandomPlanGenerator(teachers, plans, rooms)
@@ -375,6 +375,7 @@ class RandomPlanAlgorithm:
         print("-> STARTS RUNNING ASYNCH")
         self.results = pool.starmap(self.create_plan, list_with_arguments)
         print(self.results)
+        self.save_the_best_result()
 
     def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
         pool = Pool(processes=4)
@@ -392,6 +393,7 @@ class RandomPlanAlgorithm:
         print("-> STARTS RUNNING ASYNCH WITHOUT deleting")
         self.results = pool.starmap(self.create_plans_without_deleting_plans, list_with_arguments)
         print(self.results)
+        self.save_the_best_result()
 
     def find_the_best_result(self):
         print("----- Show results -----")

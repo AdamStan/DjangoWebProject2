@@ -5,6 +5,7 @@ from plans.runner import provide_creator
 from ..models import FieldOfStudy, Student
 from multiprocessing import Lock
 from .security import *
+from plans import AllParameters
 
 main_lock = Lock()
 
@@ -29,21 +30,25 @@ def action_generate(request):
         delete_on = request.POST.get('if_delete')
         algorithm_name = request.POST.get("algorithm")
 
+        number_of_generation = request.POST.get('number_of_generation')
+        number_of_crossover = request.POST.get('number_of_crossover')
+        number_of_mutation = request.POST.get('number_of_mutation')
+
         if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "" or algorithm_name == "":
             fail_message = "Plans cannot be create with this values "
         else:
             print(delete_on)
             print(algorithm_name)
-
-            plan_creator = provide_creator(algorithm_name=algorithm_name)
+            parameters = AllParameters(number_of_generation=number_of_generation,
+                                       number_of_mutation=number_of_mutation,
+                                       number_of_crossover=number_of_crossover)
+            plan_creator = provide_creator(algorithm_name=algorithm_name, plan_parameters=parameters)
             if delete_on:
                 plan_creator.create_plan_async(winter_or_summer=FieldOfStudy.SUMMER,
                                                how_many_plans=int(how_many_groups),
                                                min_hour=int(min_hour), max_hour=int(max_hour))
-                plan_creator.save_the_best_result()
             else:
                 plan_creator.create_plan_async_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
-                plan_creator.save_the_best_result()
 
             if not plan_creator.the_best_result:
                 fail_message = "Something went wrong, please try again"

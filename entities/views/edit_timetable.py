@@ -2,7 +2,7 @@ from datetime import time, datetime
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect
 from ..models import Student, Teacher, Plan, ScheduledSubject, Room
-from plans.algorithms import ImprovementHelper
+from plans.algorithms import AlgorithmsHelper
 from django.http import HttpResponse
 from .security import *
 from .utilities import *
@@ -50,19 +50,19 @@ def show_edit_timetable(request):
                 # check all in there plans
                 for ss in sch_subjects_to_edit:
                     subjects = ScheduledSubject.objects.filter(plan=ss.plan)
-                    case1 = case1 and ImprovementHelper.check_subject_to_subject_time_exclude(ss, subjects)
+                    case1 = case1 and AlgorithmsHelper.check_subject_to_subject_time_exclude(ss, subjects)
                 # check teacher can teach and exclude other lectures
-                case2 = ImprovementHelper.check_teacher_can_teach_exclude_lectures(sch_subjects_to_edit,
-                                                                                   teacher=sch_subject.teacher)
-                case3 = ImprovementHelper.check_room_is_not_taken_exclude_lectures(sch_subjects_to_edit,
-                                                                                   room=sch_subject.room)
+                case2 = AlgorithmsHelper.check_teacher_can_teach_exclude_lectures(sch_subjects_to_edit,
+                                                                                  teacher=sch_subject.teacher)
+                case3 = AlgorithmsHelper.check_room_is_not_taken_exclude_lectures(sch_subjects_to_edit,
+                                                                                  room=sch_subject.room)
                 if case1 and case2 and case3:
                     for ss in sch_subjects_to_edit:
                         ss.save()
             elif sch_subject.type == "LAB":
-                case1 = ImprovementHelper.check_subject_to_subject_time_exclude(sch_subject, subjects)
-                case2 = ImprovementHelper.check_teacher_can_teach_exclude(sch_subject, teacher=sch_subject.teacher)
-                case3 = ImprovementHelper.check_room_is_not_taken_exclude(sch_subject, room=sch_subject.room)
+                case1 = AlgorithmsHelper.check_subject_to_subject_time_exclude(sch_subject, subjects)
+                case2 = AlgorithmsHelper.check_teacher_can_teach_exclude(sch_subject, teacher=sch_subject.teacher)
+                case3 = AlgorithmsHelper.check_room_is_not_taken_exclude(sch_subject, room=sch_subject.room)
                 if case1 and case2 and case3:
                     sch_subject.save()
             parameters, plan_title = create_table(sch_subject.plan.id)
@@ -81,9 +81,9 @@ def show_edit_timetable(request):
                 subject_to_edit.whenStart = start_hour
                 subject_to_edit.whenFinnish = end_hour
                 subject_to_edit.dayOfWeek = day_of_week.weekday() + 1
-                case1 = ImprovementHelper.check_subject_to_subject_time_exclude(subject_to_edit, subjects)
-                case2 = ImprovementHelper.check_teacher_can_teach_exclude(subject_to_edit, teacher=subject_to_edit.teacher)
-                case3 = ImprovementHelper.check_room_is_not_taken_exclude(subject_to_edit, room=subject_to_edit.room)
+                case1 = AlgorithmsHelper.check_subject_to_subject_time_exclude(subject_to_edit, subjects)
+                case2 = AlgorithmsHelper.check_teacher_can_teach_exclude(subject_to_edit, teacher=subject_to_edit.teacher)
+                case3 = AlgorithmsHelper.check_room_is_not_taken_exclude(subject_to_edit, room=subject_to_edit.room)
                 if case1 and case2 and case3:
                     subject_to_edit.save()
                     return HttpResponse('')
@@ -97,10 +97,10 @@ def show_edit_timetable(request):
                     sch_subject.whenStart = start_hour
                     sch_subject.whenFinnish = end_hour
                     sch_subject.dayOfWeek = day_of_week.weekday() + 1
-                    case1 = case1 and ImprovementHelper.check_subject_to_subject_time_exclude(sch_subject, subjects)
+                    case1 = case1 and AlgorithmsHelper.check_subject_to_subject_time_exclude(sch_subject, subjects)
 
-                case2 = ImprovementHelper.check_teacher_can_teach_exclude_lectures(diff_lectures, teacher=sch_subject.teacher)
-                case3 = ImprovementHelper.check_room_is_not_taken_exclude_lectures(diff_lectures, room=sch_subject.room)
+                case2 = AlgorithmsHelper.check_teacher_can_teach_exclude_lectures(diff_lectures, teacher=sch_subject.teacher)
+                case3 = AlgorithmsHelper.check_room_is_not_taken_exclude_lectures(diff_lectures, room=sch_subject.room)
 
                 if case1 and case2 and case3:
                     for sch_subject in diff_lectures:

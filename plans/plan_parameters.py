@@ -1,19 +1,22 @@
 
-class PlanParameters:
-    def __init__(self, min_hour, max_hour, semester_type, how_many_groups):
-        self.min_hour = min_hour
-        self.max_hour = max_hour
-        self.semester_type = semester_type
-        self.how_many_groups = how_many_groups
-
-
 class ImprovementParameters:
-    def __init__(self, tries):
+    def __init__(self, tries, **kw):
         self.tries = tries
+        super(ImprovementParameters, self).__init__(**kw)
 
 
 class GeneticParameters:
-    def __init__(self, number_of_generation, number_of_crossover, number_of_mutation):
+    def __init__(self, number_of_generation, number_of_crossover, number_of_mutation, **kw):
         self.number_of_generation = number_of_generation
         self.number_of_crossover = number_of_crossover
         self.number_of_mutation = number_of_mutation
+        super(GeneticParameters, self).__init__(**kw)
+
+
+class AllParameters(ImprovementParameters, GeneticParameters):
+
+    def __init__(self, number_of_generation, number_of_crossover, number_of_mutation):
+        super(AllParameters, self).__init__(tries=number_of_generation,
+                                            number_of_generation=number_of_generation,
+                                            number_of_crossover=number_of_crossover,
+                                            number_of_mutation=number_of_mutation)
