@@ -39,10 +39,11 @@ def action_generate(request):
         else:
             print(delete_on)
             print(algorithm_name)
-            parameters = AllParameters(number_of_generation=number_of_generation,
-                                       number_of_mutation=number_of_mutation,
-                                       number_of_crossover=number_of_crossover)
+            parameters = AllParameters(number_of_generation=int(number_of_generation),
+                                       number_of_mutation=float(number_of_mutation),
+                                       number_of_crossover=float(number_of_crossover))
             plan_creator = provide_creator(algorithm_name=algorithm_name, plan_parameters=parameters)
+            print(plan_creator)
             if delete_on:
                 plan_creator.create_plan_async(winter_or_summer=FieldOfStudy.SUMMER,
                                                how_many_plans=int(how_many_groups),

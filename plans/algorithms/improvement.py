@@ -211,15 +211,23 @@ def make_improvement(how_many=1):
 class ImprovementAlgorithm:
     def __init__(self, tries):
         self.tries = tries
+        self.the_best_result = None
 
-    def create_plan_async(self, teachers, rooms, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, min_hour=8,
+    def create_plan_async(self, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, min_hour=8,
                           max_hour=19):
+        teachers = Teacher.objects.all()
+        rooms = Room.objects.all()
         from django.db import connection
         connection.close()
         result = {"Exception"}
-        while result[0] == "Exception":
+        case = result == {"Exception"}
+        logger.log(level=logger.INFO, msg="the case: " + str(case))
+
+        tries_for_generating_plan = 0
+        while result == {"Exception"} and tries_for_generating_plan < 10:
             try:
-                plans = create_empty_plans(winter_or_summer, how_many_plans, winter_or_summer)
+                fields_of_study = list(FieldOfStudy.objects.all())
+                plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
                 # OnePlanGenerator.show_objects(plans)
                 # in test purpose only!!!
                 first_plan = RandomPlanGenerator(teachers, plans, rooms)
@@ -228,14 +236,19 @@ class ImprovementAlgorithm:
                 logger.log(level=logger.INFO, msg=e)
                 import traceback
                 traceback.print_tb(e.__traceback__)
+                tries_for_generating_plan += 1
 
         self.save_the_result(result_to_save=result)
+        the_best_result = result
+        logger.log(level=logger.INFO, msg="Improvement without deleting not implemented yet")
         make_improvement(self.tries)
-        return result
 
-    def create_plan_async_without_deleting(self, teachers, rooms, plans, min_hour=8, max_hour=19):
+    def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
         # create exactly one plan with random generator without deleting plans
         # improve it how many times you get
+        teachers = Teacher.objects.all()
+        rooms = Room.objects.all()
+        plans = Plan.objects.all()
         logger.log(level=logger.INFO, msg="Improvement without deleting not implemented yet")
         pass
 
