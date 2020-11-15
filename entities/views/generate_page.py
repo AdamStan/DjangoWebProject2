@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
+
+from plans.report_generator import BasicAlgorithmReport
 from plans.runner import provide_creator
 from ..models import FieldOfStudy, Student
 from multiprocessing import Lock
@@ -54,6 +56,12 @@ def action_generate(request):
                 fail_message = "Something went wrong, please try again"
             else:
                 s_message = "Everything went well, check plans in AllPlans tab"
+            other_info = {"fail_message": fail_message, "success_message": s_message}
+            # TODO: time!!!
+            report_creator = BasicAlgorithmReport(time=100, result_value=plan_creator.the_best_result[1],
+                                                  quality_function_name=plan_creator.__class__.__name__,
+                                                  other_info_dict=other_info)
+            report_creator.create_report()
         return show_generate_page(request, fail_message, s_message)
     finally:
         main_lock.release()
