@@ -1,0 +1,52 @@
+Porównanie planów na podstawie efektów końcowych?
+czyli funkcja licząca jakąś wartość planu
+Większość źródeł stawia problem w taki sposób, że generuje na start plan niedoskonały i
+    używa swoich metod do udoskonalania planu.
+Część źródeł koncentruje się na poszczególnych zagadnieniach problemu (wykład, egzaminy, wszystkie zajęcia rzadko)
+
+Co mozna porownać?
+w mojej pracy skupilbym się na wygenerowaniu planu bez zadnych konfliktów, wobec tego nie bede skupiać sie nad rozwiazywaniem
+    konfliktów przez algorytmu, a przez ulepszanie planu bede miec na mysli jak najlepsze rozmieszczenie zajec.
+
+Co nalezy wziac pod uwage:
+w pierwszej wersji jako wzor liczący wartość planu brał pod uwage liczbę okienek i ewentualne dni wolne od zajęć (brak
+    zajęć w dniu roboczym = premia). Mógłbym to zmodyfikować w taki sposób aby dodatkowo brać pod uwage czas wykładowcy
+	prowadzącego - czy zmiana pory odbywania zajęć jest dla niego lepsza czy gorsza.
+
+jakie algorytmy sprawdzic?
+Opis, wyniki uruchamiania, wady, zalety
+1. proste, randomowe generowanie
+2. randomowe generowanie z ulepszaniem
+3. algorytm genetyczny z randomowo generowaną populacją początkową
+4. siec neuronowa, może reinforcement learning
+5. algorytmy grafowe
+
+wyniki musialby powstać na podstawie dużej ilości prób, trzeba by wyciągnąć z tego średnią i mediane, wtedy można wnioskować
+potrzeba co najmniej 3 różnych zestawów danych
+
+Czy magisterka może zawierać opis wykonania bardziej programistycznego zadania?
+Inaczej: czy praca magisterska ma odbiegac swoja strukturą od pracy inżynierskiej? pytanie o przykładową pracę magisterską.
+
+
+
+Do zrobienia:
+
+-- branch genetic-algo
+1. dodanie algorytmu genetycznego
+2. tworzenie raportu dla generowania
+
+-- branch graph-algorithm
+1. dodanie algorytmu grafowego
+2. tworzenie raportu dla generowania
+
+-- branch neuronowe cos albo RL
+1. dodac algorytm
+2. stworzyc raport
+
+-- branch adding-another-data
+1. dodanie kolejnych przykladowych danych (stworzenie zbioru B)
+2. rozbudowanie zbioru A
+
+-- branch add-celery
+3. odpalanie generowania przez celery
+4. zablokowanie odpalania algorytmu kiedy jest juz jakiś odpalony
