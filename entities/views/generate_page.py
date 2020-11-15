@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render, redirect
-from plans.algorithms.improvement import make_improvement
+from django.shortcuts import render
 from plans.runner import provide_creator
 from ..models import FieldOfStudy, Student
 from multiprocessing import Lock
@@ -58,24 +57,6 @@ def action_generate(request):
         return show_generate_page(request, fail_message, s_message)
     finally:
         main_lock.release()
-
-
-@user_passes_test(test_user_is_admin, login_url=forbidden)
-def action_improve(request):
-    """
-    TODO: Remove - action improvement will be not allowed!
-    Generation with improvement will be one of tested algorithms
-    """
-    global main_lock
-    main_lock.acquire()
-
-    number_of_generations = request.POST.get('number_of_generation')
-    make_improvement(int(number_of_generations))
-    s_message = "Algorithm made improvement to the plans"
-
-    main_lock.release()
-
-    return show_generate_page(request, s_message=s_message)
 
 
 @user_passes_test(test_user_is_admin, login_url=forbidden)

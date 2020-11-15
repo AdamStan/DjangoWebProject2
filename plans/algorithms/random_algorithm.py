@@ -3,6 +3,7 @@ from random import randint, choice
 from datetime import time
 from .algorithms_helper import create_scheduled_subjects, create_empty_plans, show_objects, show_subjects
 from multiprocessing import Pool
+from plans.quality_functions import QualityPlanFunction
 
 # :::STATIC VALUES:::
 HOW_MANY_TRIES = 100
@@ -38,6 +39,8 @@ class RandomPlanGenerator:
 
         for teacher in self.teachers:
             self.subjects_for_teachers[teacher] = []
+        self.plan_qualifier = QualityPlanFunction(self.subjects_in_plans)
+
         print("Initialize with success")
 
     def generate_plan(self, min_hour=8, max_hour=19, days=[1, 2, 3, 4, 5]):
@@ -52,7 +55,7 @@ class RandomPlanGenerator:
         self.set_laboratory_time(min_hour=min_hour, max_hour=max_hour, days=days)
         self.set_rooms_to_subjects()
         self.set_teachers_to_class()
-        return [self, self.calculate_value()]
+        return [self, self.plan_qualifier.calculate_value()]
 
     def set_lectures_time(self, min_hour=8, max_hour=19, days=[1, 2, 3, 4, 5]):
         """
@@ -405,13 +408,14 @@ class RandomPlanAlgorithm:
             elif len(result) == 2:
                 the_best_result = result
         print("The_best_result")
-        print(result)
+        print(the_best_result)
         return the_best_result
 
     def save_the_best_result(self):
         from django.db import connection
         connection.close()
         result_to_save = self.find_the_best_result()
+        print("saves: " + str(result_to_save))
         if result_to_save:
             plans = result_to_save[0].plans
             sch_subject_plans = result_to_save[0].subjects_in_plans

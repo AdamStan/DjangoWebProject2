@@ -115,21 +115,6 @@
     </div>
 </form>
 <br/>
-<!-- <h1> Improvements </h1>
-<form action="{% url 'entities:improvement' %}" method="post">
-    {% csrf_token %}
-    <div class="table-responsive">
-        <table>
-            <tr>
-                <td> How many tries: </td>
-                <td><input class="form-control" type="number" name="number_of_generation" min="1" max="20000" value="100" placeholder=""/></td>
-            </tr>
-            <tr>
-                <td><button class="btn background-second" type="submit" name="action" value="improve"> Improve </button></td>
-            </tr>
-        </table>
-    </div>
-</form> -->
 <h1> New semester</h1>
 <form action="{% url 'entities:new_semester' %}" method="post">
     {% csrf_token %}

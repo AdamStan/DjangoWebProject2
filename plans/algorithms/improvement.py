@@ -209,6 +209,8 @@ def make_improvement(how_many=1):
 
 # TODO: create plan with improvements!!!
 class ImprovementAlgorithm:
+    TRIES_FOR_NEW_PLAN_CREATION = 10
+
     def __init__(self, tries):
         self.tries = tries
         self.the_best_result = None
@@ -224,7 +226,7 @@ class ImprovementAlgorithm:
         logger.log(level=logger.INFO, msg="the case: " + str(case))
 
         tries_for_generating_plan = 0
-        while result == {"Exception"} and tries_for_generating_plan < 10:
+        while result == {"Exception"} and tries_for_generating_plan < ImprovementAlgorithm.TRIES_FOR_NEW_PLAN_CREATION:
             try:
                 fields_of_study = list(FieldOfStudy.objects.all())
                 plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
@@ -240,7 +242,7 @@ class ImprovementAlgorithm:
 
         self.save_the_result(result_to_save=result)
         the_best_result = result
-        logger.log(level=logger.INFO, msg="Improvement without deleting not implemented yet")
+        logger.log(level=logger.INFO, msg="Improvement starts - with deleting")
         make_improvement(self.tries)
 
     def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
@@ -249,8 +251,30 @@ class ImprovementAlgorithm:
         teachers = Teacher.objects.all()
         rooms = Room.objects.all()
         plans = Plan.objects.all()
-        logger.log(level=logger.INFO, msg="Improvement without deleting not implemented yet")
-        pass
+
+        from django.db import connection
+        connection.close()
+        result = {"Exception"}
+        case = result == {"Exception"}
+        logger.log(level=logger.INFO, msg="the case: " + str(case))
+
+        tries_for_generating_plan = 0
+        while result == {"Exception"} and tries_for_generating_plan < ImprovementAlgorithm.TRIES_FOR_NEW_PLAN_CREATION:
+            try:
+                # OnePlanGenerator.show_objects(plans)
+                # in test purpose only!!!
+                first_plan = RandomPlanGenerator(teachers, plans, rooms)
+                result = first_plan.generate_plan(min_hour, max_hour)
+            except Exception as e:
+                logger.log(level=logger.INFO, msg=e)
+                import traceback
+                traceback.print_tb(e.__traceback__)
+                tries_for_generating_plan += 1
+
+        self.save_the_result(result_to_save=result)
+        the_best_result = result
+        logger.log(level=logger.INFO, msg="Improvement starts - without deleting")
+        make_improvement(self.tries)
 
     def save_the_result(self, result_to_save):
         from django.db import connection
