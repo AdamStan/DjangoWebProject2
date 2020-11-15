@@ -15,7 +15,6 @@ urlpatterns = [
     path('teacherplan/', views.show_teacher_plan, name='teacherplan'),
     path('generate/', views.show_generate_page, name='generate'),
     path('make_generate/', views.action_generate, name="make_generate"),
-    path('make_improvement/', views.action_improve, name="improvement"),
     path('new_semester/', views.action_new_semester, name="new_semester"),
     path('forbidden/', views.show_forbidden, name='forbidden'),
 ]

@@ -2,7 +2,7 @@ from datetime import time
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from setuptools.command.rotate import rotate
-from .algorithm import ImprovementHelper
+from plans.algorithms import AlgorithmsHelper
 from .views import test_user_is_admin, forbidden
 from accounts.models import User, UserManager
 from .models import *
@@ -306,17 +306,17 @@ def show_scheduledsubject(request):
                 #check all in there plans
                 for ss in sch_subjects_to_edit:
                     subjects = ScheduledSubject.objects.filter(plan=ss.plan)
-                    case1 = case1 and ImprovementHelper.check_subject_to_subject_time_exclude(ss, subjects)
+                    case1 = case1 and AlgorithmsHelper.check_subject_to_subject_time_exclude(ss, subjects)
                 #check teacher can teach and exclude other lectures
-                case2 = ImprovementHelper.check_teacher_can_teach_exclude_lectures(sch_subjects_to_edit, teacher=sch_subject.teacher)
-                case3 = ImprovementHelper.check_room_is_not_taken_exclude_lectures(sch_subjects_to_edit, room=sch_subject.room)
+                case2 = AlgorithmsHelper.check_teacher_can_teach_exclude_lectures(sch_subjects_to_edit, teacher=sch_subject.teacher)
+                case3 = AlgorithmsHelper.check_room_is_not_taken_exclude_lectures(sch_subjects_to_edit, room=sch_subject.room)
                 if case1 and case2 and case3:
                     for ss in sch_subjects_to_edit:
                         ss.save()
             elif sch_subject.type == "LAB":
-                case1 = ImprovementHelper.check_subject_to_subject_time_exclude(sch_subject, subjects)
-                case2 = ImprovementHelper.check_teacher_can_teach_exclude(sch_subject, teacher=sch_subject.teacher)
-                case3 = ImprovementHelper.check_room_is_not_taken_exclude(sch_subject, room=sch_subject.room)
+                case1 = AlgorithmsHelper.check_subject_to_subject_time_exclude(sch_subject, subjects)
+                case2 = AlgorithmsHelper.check_teacher_can_teach_exclude(sch_subject, teacher=sch_subject.teacher)
+                case3 = AlgorithmsHelper.check_room_is_not_taken_exclude(sch_subject, room=sch_subject.room)
                 if case1 and case2 and case3:
                     sch_subject.save()
             s_message = "You've changed classes successfully"

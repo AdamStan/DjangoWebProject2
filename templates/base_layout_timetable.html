@@ -36,23 +36,6 @@
                             </form>
                         </div>
                     </div>
-                    <!--
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'entities:generate' %}"> Generate plans </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'entities:edittimetables' %}"> Edit plans </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'entities:studentplans' %}"> Choose plan </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'entities:studentplan' %}"> My plan s </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'entities:teacherplan' %}"> My plan t </a>
-                    </li>
-                    -->
                     {% if user.is_authenticated %}
                         {% if user.admin %}
                             <li class="nav-item">

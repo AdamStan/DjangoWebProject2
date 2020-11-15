@@ -1,10 +1,12 @@
+import logging as logger
 from django.db import transaction
-from numpy import array, zeros
-from random import randint, choice
+from random import choice
 from datetime import time
-from copy import deepcopy
-from .algorithm import ImprovementHelper
-from .models import Room, Teacher, ScheduledSubject, Plan
+
+from . import RandomPlanGenerator
+from .algorithms import AlgorithmsHelper
+from entities.models import Room, Teacher, ScheduledSubject, Plan, FieldOfStudy
+from .algorithms_helper import create_scheduled_subjects, create_empty_plans, show_objects, show_subjects
 
 
 class ImprovementManagerQuerySets:
@@ -93,9 +95,9 @@ class ImprovementManagerQuerySets:
 
                 all_cases = True
                 for sub in others_lectures:
-                    case1 = ImprovementHelper.check_room_is_not_taken_exclude(sub, sub.room)
-                    case2 = ImprovementHelper.check_teacher_can_teach_exclude(sub, sub.teacher)
-                    case3 = ImprovementHelper.check_subject_to_subject_time(
+                    case1 = AlgorithmsHelper.check_room_is_not_taken_exclude(sub, sub.room)
+                    case2 = AlgorithmsHelper.check_teacher_can_teach_exclude(sub, sub.teacher)
+                    case3 = AlgorithmsHelper.check_subject_to_subject_time(
                         sub,self.scheduled_subjects.filter(plan=sub.plan).exclude(id=subject_to_change.id))
                     all_cases = all_cases and case1 and case2 and case3
 
@@ -134,12 +136,12 @@ class ImprovementManagerQuerySets:
         value_after = self.value_for_plan(subjects_in_plan=self.scheduled_subjects.filter(plan=plan_to_change))
         print("New value:" + str(value_after))
 
-        isRoomTakenCorrectly = ImprovementHelper.check_room_is_not_taken_exclude(subject_to_change,
-                                                                                 subject_to_change.room)
-        teacher_can_teach = ImprovementHelper.check_teacher_can_teach_exclude(subject_to_change,
-                                                                              subject_to_change.teacher)
-        plan_is_correct = ImprovementHelper.check_subject_to_subject_time(subject_to_change,
-                                                                          self.scheduled_subjects.filter(
+        isRoomTakenCorrectly = AlgorithmsHelper.check_room_is_not_taken_exclude(subject_to_change,
+                                                                                subject_to_change.room)
+        teacher_can_teach = AlgorithmsHelper.check_teacher_can_teach_exclude(subject_to_change,
+                                                                             subject_to_change.teacher)
+        plan_is_correct = AlgorithmsHelper.check_subject_to_subject_time(subject_to_change,
+                                                                         self.scheduled_subjects.filter(
                                                                               plan=plan_to_change).exclude(
                                                                               id=subject_to_change.id))
         return isRoomTakenCorrectly and teacher_can_teach and plan_is_correct and value_before > value_after
@@ -191,6 +193,7 @@ class ImprovementManagerQuerySets:
         print("Success (lab): " + str(self.success_lab))
         print("Success (lec): " + str(self.success_lec))
 
+
 def make_improvement(how_many=1):
     scheduled_subjects = ScheduledSubject.objects.all()
     rooms = Room.objects.all().order_by("id")
@@ -198,7 +201,100 @@ def make_improvement(how_many=1):
     plans = Plan.objects.all().order_by("id")
 
     instance = ImprovementManagerQuerySets(plans=plans, sch_subjects=scheduled_subjects, teachers=teachers, rooms=rooms)
-    for i in range(0,how_many):
+    for i in range(0, how_many):
         instance.generation()
 
     instance.show_conclusion()
+
+
+# TODO: create plan with improvements!!!
+class ImprovementAlgorithm:
+    TRIES_FOR_NEW_PLAN_CREATION = 10
+
+    def __init__(self, tries):
+        self.tries = tries
+        self.the_best_result = None
+
+    def create_plan_async(self, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, min_hour=8,
+                          max_hour=19):
+        teachers = Teacher.objects.all()
+        rooms = Room.objects.all()
+        from django.db import connection
+        connection.close()
+        result = {"Exception"}
+        case = result == {"Exception"}
+        logger.log(level=logger.INFO, msg="the case: " + str(case))
+
+        tries_for_generating_plan = 0
+        while result == {"Exception"} and tries_for_generating_plan < ImprovementAlgorithm.TRIES_FOR_NEW_PLAN_CREATION:
+            try:
+                fields_of_study = list(FieldOfStudy.objects.all())
+                plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
+                # OnePlanGenerator.show_objects(plans)
+                # in test purpose only!!!
+                first_plan = RandomPlanGenerator(teachers, plans, rooms)
+                result = first_plan.generate_plan(min_hour, max_hour)
+            except Exception as e:
+                logger.log(level=logger.INFO, msg=e)
+                import traceback
+                traceback.print_tb(e.__traceback__)
+                tries_for_generating_plan += 1
+
+        self.save_the_result(result_to_save=result)
+        the_best_result = result
+        logger.log(level=logger.INFO, msg="Improvement starts - with deleting")
+        make_improvement(self.tries)
+
+    def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
+        # create exactly one plan with random generator without deleting plans
+        # improve it how many times you get
+        teachers = Teacher.objects.all()
+        rooms = Room.objects.all()
+        plans = Plan.objects.all()
+
+        from django.db import connection
+        connection.close()
+        result = {"Exception"}
+        case = result == {"Exception"}
+        logger.log(level=logger.INFO, msg="the case: " + str(case))
+
+        tries_for_generating_plan = 0
+        while result == {"Exception"} and tries_for_generating_plan < ImprovementAlgorithm.TRIES_FOR_NEW_PLAN_CREATION:
+            try:
+                # OnePlanGenerator.show_objects(plans)
+                # in test purpose only!!!
+                first_plan = RandomPlanGenerator(teachers, plans, rooms)
+                result = first_plan.generate_plan(min_hour, max_hour)
+            except Exception as e:
+                logger.log(level=logger.INFO, msg=e)
+                import traceback
+                traceback.print_tb(e.__traceback__)
+                tries_for_generating_plan += 1
+
+        self.save_the_result(result_to_save=result)
+        the_best_result = result
+        logger.log(level=logger.INFO, msg="Improvement starts - without deleting")
+        make_improvement(self.tries)
+
+    def save_the_result(self, result_to_save):
+        from django.db import connection
+        connection.close()
+        if result_to_save:
+            plans = result_to_save[0].plans
+            sch_subject_plans = result_to_save[0].subjects_in_plans
+            ScheduledSubject.objects.all().delete()
+            Plan.objects.all().delete()
+            # SAVE
+            for plan in plans:
+                plan.save()
+            for i in range(len(plans)):
+                title = sch_subject_plans[i][0].plan.title
+                plan = Plan.objects.get(title=title)
+                for sch_subject in sch_subject_plans[i]:
+                    sch_subject.plan = plan
+                    sch_subject.save()
+            self.the_best_result = result_to_save
+        logger.log(level=logger.INFO, msg="Improvement algorithm saves plan")
+
+    def save_the_best_result(self):
+        logger.log(level=logger.INFO, msg="Improvement algorithm not implements save_the_best_result, consider removing")

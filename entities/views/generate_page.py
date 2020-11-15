@@ -1,11 +1,12 @@
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render, redirect
-from ..models import Student
-from ..improvement import make_improvement
-from plans.runner import CreatePlanManager
-from ..models import FieldOfStudy
+from django.shortcuts import render
+
+from plans.report_generator import BasicAlgorithmReport
+from plans.runner import provide_creator
+from ..models import FieldOfStudy, Student
 from multiprocessing import Lock
 from .security import *
+from plans import AllParameters
 
 main_lock = Lock()
 
@@ -22,47 +23,48 @@ def action_generate(request):
     fail_message = ""
     s_message = ""
     try:
+        # basic parameters
         min_hour = request.POST.get("first_hour")
         max_hour = request.POST.get("last_hour")
         semester_type = request.POST.get("semester_type")
         how_many_groups = request.POST.get("how_many_groups")
         delete_on = request.POST.get('if_delete')
-        if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "":
+        algorithm_name = request.POST.get("algorithm")
+
+        number_of_generation = request.POST.get('number_of_generation')
+        number_of_crossover = request.POST.get('number_of_crossover')
+        number_of_mutation = request.POST.get('number_of_mutation')
+
+        if max_hour == "" or min_hour == "" or semester_type == "None" or how_many_groups == "" or algorithm_name == "":
             fail_message = "Plans cannot be create with this values "
         else:
             print(delete_on)
-            # try:
-            cpm = CreatePlanManager()
+            print(algorithm_name)
+            parameters = AllParameters(number_of_generation=int(number_of_generation),
+                                       number_of_mutation=float(number_of_mutation),
+                                       number_of_crossover=float(number_of_crossover))
+            plan_creator = provide_creator(algorithm_name=algorithm_name, plan_parameters=parameters)
+            print(plan_creator)
             if delete_on:
-                cpm.create_plan_asynch(winterOrSummer=FieldOfStudy.SUMMER, how_many_plans=int(how_many_groups),
-                                       min_hour=int(min_hour), max_hour=int(max_hour))
-                cpm.save_the_best_result()
+                plan_creator.create_plan_async(winter_or_summer=FieldOfStudy.SUMMER,
+                                               how_many_plans=int(how_many_groups),
+                                               min_hour=int(min_hour), max_hour=int(max_hour))
             else:
-                # create_plans_without_delete
-                cpm.create_plan_asynch_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
-                cpm.save_the_best_result()
+                plan_creator.create_plan_async_without_deleting(min_hour=int(min_hour), max_hour=int(max_hour))
 
-            if not cpm.the_best_result:
+            if not plan_creator.the_best_result:
                 fail_message = "Something went wrong, please try again"
             else:
                 s_message = "Everything went well, check plans in AllPlans tab"
+            other_info = {"fail_message": fail_message, "success_message": s_message}
+            # TODO: time!!!
+            report_creator = BasicAlgorithmReport(time=100, result_value=plan_creator.the_best_result[1],
+                                                  quality_function_name=plan_creator.__class__.__name__,
+                                                  other_info_dict=other_info)
+            report_creator.create_report()
         return show_generate_page(request, fail_message, s_message)
     finally:
         main_lock.release()
-
-
-@user_passes_test(test_user_is_admin, login_url=forbidden)
-def action_improve(request):
-    global main_lock
-    main_lock.acquire()
-
-    number_of_generations = request.POST.get('number_of_generation')
-    make_improvement(int(number_of_generations))
-    s_message = "Algorithm made improvement to the plans"
-
-    main_lock.release()
-
-    return show_generate_page(request, s_message=s_message)
 
 
 @user_passes_test(test_user_is_admin, login_url=forbidden)

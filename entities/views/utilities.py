@@ -1,4 +1,4 @@
-from ..models import Teacher, Plan, ScheduledSubject, Room
+from entities.models import Teacher, Plan, ScheduledSubject, Room
 import json
 
 class SubjectExample:

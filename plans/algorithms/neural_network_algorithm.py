@@ -1,9 +1,9 @@
+# TODO: create plan with improvements!!!
 import logging as logger
 from entities.models import FieldOfStudy
 
 
-# TODO: create plan with improvements!!!
-class GeneticAlgorithm:
+class NNPlanGeneratorAlgorithm:
 
     def create_plan_async(self, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, min_hour=8, max_hour=19):
         pass
