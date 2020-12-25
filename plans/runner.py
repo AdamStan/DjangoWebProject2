@@ -1,11 +1,5 @@
 from plans.algorithms import RandomPlanAlgorithm, ImprovementAlgorithm, GeneticAlgorithm, NNPlanGeneratorAlgorithm, \
-    GraphAlgorithm
-
-
-def run_it_in_shell():
-    cpm = RandomPlanAlgorithm()
-    cpm.create_plan_async_without_deleting()
-    cpm.save_the_best_result()
+    GraphAlgorithmRunner
 
 
 def provide_creator(algorithm_name, plan_parameters):
@@ -18,4 +12,4 @@ def provide_creator(algorithm_name, plan_parameters):
     if algorithm_name == "algorithm-nn":
         return NNPlanGeneratorAlgorithm()
     if algorithm_name == "algorithm-graph":
-        return GraphAlgorithm()
+        return GraphAlgorithmRunner()

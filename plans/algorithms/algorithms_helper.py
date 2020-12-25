@@ -16,7 +16,7 @@ def create_empty_plans(fields_of_study, how_many_plans, winter_or_summer):
     return plans
 
 
-def create_scheduled_subjects(plan, weeks):
+def create_scheduled_subjects(plan, weeks=15):
     subjects = Subject.objects.filter(fieldOfStudy=plan.fieldOfStudy, semester=plan.semester)
     list_of_scheduled_subjects = []
     for subject in subjects:
