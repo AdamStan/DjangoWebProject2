@@ -7,7 +7,6 @@ class ValueOfPlanStrategy1:
 
     def get_value_of_plan(self, subjects_by_days):
         value = 0
-        #subjects_by_days = get_events_by_day(scheduled_subjects_in_plans)
         for day, subjects in subjects_by_days.items():
             if len(subjects) == 0:
                 continue
@@ -22,16 +21,14 @@ class ValueOfPlanStrategy1:
                 if max_hour < subject.whenFinnish.hour:
                     max_hour = subject.whenFinnish.hour
             value += max_hour - min_hour - how_long_subjects_take
-            print(min_hour, max_hour)
 
         return value
 
     def get_value_of_plan_after_action(self, subjects_by_days, action):
         value = 0
-        # subjects_by_days = get_events_by_day(scheduled_subjects)
         # check if action is legal
         if check_action_can_be_done(action, subjects_by_days):
-            # calculate and return
+            # calculate the value
             for day, subjects in subjects_by_days.items():
                 subject_added = None
                 if day == action.day:

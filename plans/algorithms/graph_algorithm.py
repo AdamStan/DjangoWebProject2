@@ -36,20 +36,19 @@ class GraphAlgorithm:
 
     def set_scheduled_subject(self):
         self.logger.log(logging.INFO, "Settings lessons to plans")
-        # for plan in self.plans:
-        #     for scheduled_subject in self.scheduled_subjects[plan.title]:
-        #         print(scheduled_subject)
         all_scheduled_subjects = list()
         for subjects_list in self.scheduled_subjects.values():
-            #TODO: add all subjects to list - flat
             all_scheduled_subjects += subjects_list
         environment = Environment(self.plans, all_scheduled_subjects, ValueOfPlanStrategy1(),
                                   self.min_hour, self.max_hour)
 
         for plan in self.plans:
             scheduled_subjects_in_plan = self.scheduled_subjects[plan.title]
-            for not_sch_subject in scheduled_subjects_in_plan:
-                available_actions = environment.get_available_actions(plan, not_sch_subject)
+            for sch_subject in scheduled_subjects_in_plan:
+                # Lecture can be set earlier
+                if sch_subject.whenStart is not None:
+                    continue
+                available_actions = environment.get_available_actions(plan, sch_subject)
                 the_lower_cost = sys.maxsize
                 the_best_action = None
                 for action in available_actions:
