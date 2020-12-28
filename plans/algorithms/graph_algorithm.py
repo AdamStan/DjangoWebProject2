@@ -1,7 +1,10 @@
-# TODO: create plan with improvements!!!
 import logging
+import sys
+
 from entities.models import FieldOfStudy, Plan, Teacher, Room, ScheduledSubject
 from .algorithms_helper import create_empty_plans, create_scheduled_subjects
+from .state import Environment
+from .value_strategies import ValueOfPlanStrategy1
 
 
 class GraphAlgorithm:
@@ -27,6 +30,41 @@ class GraphAlgorithm:
 
     def create_plan(self):
         self.logger.log(logging.INFO, "Starting creating plan with graph algorithm")
+        self.set_scheduled_subject()
+        self.set_teachers()
+        self.set_rooms()
+
+    def set_scheduled_subject(self):
+        self.logger.log(logging.INFO, "Settings lessons to plans")
+        # for plan in self.plans:
+        #     for scheduled_subject in self.scheduled_subjects[plan.title]:
+        #         print(scheduled_subject)
+        all_scheduled_subjects = list()
+        for subjects_list in self.scheduled_subjects.values():
+            #TODO: add all subjects to list - flat
+            all_scheduled_subjects += subjects_list
+        environment = Environment(self.plans, all_scheduled_subjects, ValueOfPlanStrategy1(),
+                                  self.min_hour, self.max_hour)
+
+        for plan in self.plans:
+            scheduled_subjects_in_plan = self.scheduled_subjects[plan.title]
+            for not_sch_subject in scheduled_subjects_in_plan:
+                available_actions = environment.get_available_actions(plan, not_sch_subject)
+                the_lower_cost = sys.maxsize
+                the_best_action = None
+                for action in available_actions:
+                    cost = environment.get_cost_of_action(action)
+                    if the_lower_cost > cost:
+                        the_lower_cost = cost
+                        the_best_action = action
+                if the_best_action is None:
+                    raise Exception("There is no best action, plan may be full!")
+                environment.make_action(the_best_action)
+
+    def set_teachers(self):
+        pass
+
+    def set_rooms(self):
         pass
 
 
