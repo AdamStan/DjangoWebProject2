@@ -30,17 +30,15 @@ class GraphAlgorithm:
 
     def create_plan(self):
         self.logger.log(logging.INFO, "Starting creating plan with graph algorithm")
-        self.set_scheduled_subject()
-        self.set_teachers()
-        self.set_rooms()
-
-    def set_scheduled_subject(self):
-        self.logger.log(logging.INFO, "Settings lessons to plans")
         all_scheduled_subjects = list()
         for subjects_list in self.scheduled_subjects.values():
             all_scheduled_subjects += subjects_list
-        environment = Environment(self.plans, all_scheduled_subjects, ValueOfPlanStrategy1(),
-                                  self.min_hour, self.max_hour)
+        environment_sch_subjects = Environment(self.plans, all_scheduled_subjects, ValueOfPlanStrategy1(),
+                                               self.teachers, self.rooms, self.min_hour, self.max_hour)
+        self.set_scheduled_subject(environment_sch_subjects)
+
+    def set_scheduled_subject(self, environment):
+        self.logger.log(logging.INFO, "Settings lessons to plans")
 
         for plan in self.plans:
             scheduled_subjects_in_plan = self.scheduled_subjects[plan.title]
@@ -60,11 +58,23 @@ class GraphAlgorithm:
                     raise Exception("There is no best action, plan may be full!")
                 environment.make_action(the_best_action)
 
-    def set_teachers(self):
-        pass
-
-    def set_rooms(self):
-        pass
+    # def set_teachers(self, environment):
+    #     # TODO: make it like in set sch subjects
+    #     for plan in self.plans:
+    #         scheduled_subjects_in_plan = self.scheduled_subjects[plan.title]
+    #         for sch_subject in scheduled_subjects_in_plan:
+    #             # Lecture can be set earlier
+    #             if sch_subject.teacher is not None:
+    #                 continue
+    #             teachers = environment.get_available_teachers(plan, sch_subject)
+    #             if len(teachers) < 1:
+    #                 raise Exception("There is no teacher to set, every teacher for subject has a class in this time!")
+    #             environment.set_teacher()
+    #     pass
+    #
+    # def set_rooms(self):
+    #     # TODO: make it like in set sch subjects
+    #     pass
 
 
 class GraphAlgorithmRunner:
