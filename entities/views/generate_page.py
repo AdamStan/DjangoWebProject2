@@ -63,7 +63,7 @@ def action_generate(request):
                 # TODO: time!!!
                 report_creator = BasicAlgorithmReport(time=100, result_value=plan_creator.the_best_result[1],
                                                       quality_function_name=plan_creator.__class__.__name__,
-                                                      other_info_dict=s_message)
+                                                      other_info_dict={"success": s_message})
                 report_creator.create_report()
 
         return show_generate_page(request, fail_message, s_message)

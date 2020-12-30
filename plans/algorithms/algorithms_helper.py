@@ -60,7 +60,7 @@ def check_action_can_be_done(action, subjects_by_day):
 
 def get_events_by_day(subjects_in_plan):
     """
-    @param subjects_in_plan:
+    @param subjects_in_plan: a list or other iterable
     @return: dictionary with a day as a key and a list of scheduled_subjects as a value
     """
     days = [0, 1, 2, 3, 4, 5, 6]

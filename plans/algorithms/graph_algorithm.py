@@ -2,7 +2,7 @@ import logging
 import sys
 
 from entities.models import FieldOfStudy, Plan, Teacher, Room, ScheduledSubject
-from .algorithms_helper import create_empty_plans, create_scheduled_subjects
+from .algorithms_helper import create_empty_plans, create_scheduled_subjects, get_events_by_day
 from .state import Environment
 from .value_strategies import ValueOfPlanStrategy1
 
@@ -20,6 +20,7 @@ class GraphAlgorithm:
         @param min_hour: when lesson can start
         @param max_hour: when lesson can end
         """
+        self.strategy = ValueOfPlanStrategy1()
         self.rooms = rooms
         self.teachers = teachers
         self.plans = plans
@@ -33,9 +34,11 @@ class GraphAlgorithm:
         all_scheduled_subjects = list()
         for subjects_list in self.scheduled_subjects.values():
             all_scheduled_subjects += subjects_list
-        environment_sch_subjects = Environment(self.plans, all_scheduled_subjects, ValueOfPlanStrategy1(),
+        environment_sch_subjects = Environment(self.plans, all_scheduled_subjects, self.strategy,
                                                self.teachers, self.rooms, self.min_hour, self.max_hour)
         self.set_scheduled_subject(environment_sch_subjects)
+
+        self.save_result()
 
     def set_scheduled_subject(self, environment):
         self.logger.log(logging.INFO, "Settings lessons to plans")
@@ -58,23 +61,21 @@ class GraphAlgorithm:
                     raise Exception("There is no best action, plan may be full!")
                 environment.make_action(the_best_action)
 
-    # def set_teachers(self, environment):
-    #     # TODO: make it like in set sch subjects
-    #     for plan in self.plans:
-    #         scheduled_subjects_in_plan = self.scheduled_subjects[plan.title]
-    #         for sch_subject in scheduled_subjects_in_plan:
-    #             # Lecture can be set earlier
-    #             if sch_subject.teacher is not None:
-    #                 continue
-    #             teachers = environment.get_available_teachers(plan, sch_subject)
-    #             if len(teachers) < 1:
-    #                 raise Exception("There is no teacher to set, every teacher for subject has a class in this time!")
-    #             environment.set_teacher()
-    #     pass
-    #
-    # def set_rooms(self):
-    #     # TODO: make it like in set sch subjects
-    #     pass
+    def value_of_plans(self):
+        value = 0
+        for plan in self.plans:
+            subjects_in_plan_by_days = get_events_by_day(self.scheduled_subjects[plan.title])
+            value += self.strategy.get_value_of_plan(subjects_in_plan_by_days)
+        return value
+
+    def save_result(self):
+        ScheduledSubject.objects.all().delete()
+        Plan.objects.all().delete()
+        for plan in self.plans:
+            plan.save()
+        for plan_sch_subjects in self.scheduled_subjects.values():
+            for sch_subject in plan_sch_subjects:
+                sch_subject.save()
 
 
 class GraphAlgorithmRunner:
@@ -96,13 +97,22 @@ class GraphAlgorithmRunner:
         algorithm = GraphAlgorithm(teachers, rooms, plans, plans_scheduled_subjects, min_hour, max_hour)
         algorithm.create_plan()
 
+        self.the_best_result = "result", algorithm.value_of_plans()
+        algorithm.save_result()
+
     def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
         teachers = Teacher.objects.all()
         rooms = Room.objects.all()
         plans = Plan.objects.all()
         scheduled_subject = ScheduledSubject.objects.all()
+
+        for subject in scheduled_subject:
+            subject.whenStart = None
+            subject.whenFinnish = None
+            subject.teacher = None
+            subject.room = None
+            subject.dayOfWeek = None
+
         algorithm = GraphAlgorithm(teachers, rooms, plans, scheduled_subject, min_hour, max_hour)
         algorithm.create_plan()
 
-    def save_the_best_result(self):
-        logging.log(level=logging.INFO, msg="Algorithm not supported!")
