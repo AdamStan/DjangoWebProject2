@@ -16,7 +16,7 @@ def create_empty_plans(fields_of_study, how_many_plans, winter_or_summer):
     return plans
 
 
-def create_scheduled_subjects(plan, weeks):
+def create_scheduled_subjects(plan, weeks=15):
     subjects = Subject.objects.filter(fieldOfStudy=plan.fieldOfStudy, semester=plan.semester)
     list_of_scheduled_subjects = []
     for subject in subjects:
@@ -43,3 +43,31 @@ def show_subjects(scheduled_subjects):
     for sch in scheduled_subjects:
         print(str(sch) + ", " + str(sch.whenStart) + ", " + str(sch.whenFinnish) + ", day:" + str(sch.dayOfWeek)
                 + ", how_long: " + str(sch.how_long))
+
+
+def check_action_can_be_done(action, subjects_by_day):
+    # search the subject from plan
+    if len(subjects_by_day[action.day]) > 0:
+        for subject_in_plan in subjects_by_day[action.day]:
+            difference_between_starts = abs(action.time.hour - subject_in_plan.whenStart.hour)
+            difference_between_ends = abs(action.time.hour + action.schedule_subject.how_long -
+                                          subject_in_plan.whenFinnish.hour)
+            if (difference_between_starts + difference_between_ends) \
+                    < (action.schedule_subject.how_long + subject_in_plan.how_long):
+                return False
+    return True
+
+
+def get_events_by_day(subjects_in_plan):
+    """
+    @param subjects_in_plan: a list or other iterable
+    @return: dictionary with a day as a key and a list of scheduled_subjects as a value
+    """
+    days = [0, 1, 2, 3, 4, 5, 6]
+    subjects_by_days = dict()
+    for day in days:
+        subjects_by_days[day] = list()
+        for subject in subjects_in_plan:
+            if subject.dayOfWeek == day:
+                subjects_by_days[day].append(subject)
+    return subjects_by_days
