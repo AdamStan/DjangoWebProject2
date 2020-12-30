@@ -1,5 +1,6 @@
 import logging
 import sys
+from random import choice
 
 from entities.models import FieldOfStudy, Plan, Teacher, Room, ScheduledSubject
 from .algorithms_helper import create_empty_plans, create_scheduled_subjects, get_events_by_day
@@ -51,14 +52,19 @@ class GraphAlgorithm:
                     continue
                 available_actions = environment.get_available_actions(plan, sch_subject)
                 the_lower_cost = sys.maxsize
-                the_best_action = None
+                the_best_actions = list()
                 for action in available_actions:
                     cost = environment.get_cost_of_action(action)
                     if the_lower_cost > cost:
                         the_lower_cost = cost
-                        the_best_action = action
-                if the_best_action is None:
+                        the_best_actions.clear()
+                        the_best_actions.append(action)
+                    elif the_lower_cost == cost:
+                        the_best_actions.append(action)
+
+                if len(the_best_actions) < 1:
                     raise Exception("There is no best action, plan may be full!")
+                the_best_action = choice(the_best_actions)
                 environment.make_action(the_best_action)
 
     def value_of_plans(self):
