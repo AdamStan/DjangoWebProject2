@@ -40,13 +40,17 @@ def action_generate(request):
         else:
             print(delete_on)
             print(algorithm_name)
+            if int(semester_type) == 1:
+                semester_type = FieldOfStudy.WINTER
+            else:
+                semester_type = FieldOfStudy.SUMMER
             parameters = AllParameters(number_of_generation=int(number_of_generation),
                                        number_of_mutation=float(number_of_mutation),
                                        number_of_crossover=float(number_of_crossover))
             plan_creator = provide_creator(algorithm_name=algorithm_name, plan_parameters=parameters)
             print(plan_creator)
             if delete_on:
-                plan_creator.create_plan_async(winter_or_summer=FieldOfStudy.SUMMER,
+                plan_creator.create_plan_async(winter_or_summer=semester_type,
                                                how_many_plans=int(how_many_groups),
                                                min_hour=int(min_hour), max_hour=int(max_hour))
             else:
@@ -56,12 +60,12 @@ def action_generate(request):
                 fail_message = "Something went wrong, please try again"
             else:
                 s_message = "Everything went well, check plans in AllPlans tab"
-            other_info = {"fail_message": fail_message, "success_message": s_message}
-            # TODO: time!!!
-            report_creator = BasicAlgorithmReport(time=100, result_value=plan_creator.the_best_result[1],
-                                                  quality_function_name=plan_creator.__class__.__name__,
-                                                  other_info_dict=other_info)
-            report_creator.create_report()
+                # TODO: time!!!
+                report_creator = BasicAlgorithmReport(time=100, result_value=plan_creator.the_best_result[1],
+                                                      quality_function_name=plan_creator.__class__.__name__,
+                                                      other_info_dict={"success": s_message})
+                report_creator.create_report()
+
         return show_generate_page(request, fail_message, s_message)
     finally:
         main_lock.release()
