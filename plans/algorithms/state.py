@@ -1,4 +1,3 @@
-import sys
 from datetime import time
 
 from entities.models import ScheduledSubject, Room, Teacher

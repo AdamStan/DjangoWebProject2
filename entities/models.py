@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Max
 import json
-from accounts.models import User # it works, really
+from accounts.models import User
 
 
 # Create your models here.
