@@ -95,3 +95,13 @@ def check_teacher_can_teach(sch_subject, teachers_subjects):
             return False
 
     return True
+
+
+def check_hour_is_available(hour, scheduled_subjects, how_long):
+    for event in scheduled_subjects:
+        difference_between_starts = abs(event.whenStart.hour - hour)
+        difference_between_ends = abs(event.whenFinnish.hour - hour)
+        if (difference_between_starts + difference_between_ends) < (event.how_long + how_long):
+            return False
+
+    return True

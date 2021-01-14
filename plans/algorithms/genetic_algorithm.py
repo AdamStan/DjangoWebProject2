@@ -6,7 +6,7 @@ from entities.models import FieldOfStudy, Teacher, Room, ScheduledSubject, Plan
 
 from .random_algorithm import RandomPlanGenerator
 from .algorithms_helper import create_empty_plans, get_events_by_day, check_action_can_be_done, \
-    create_scheduled_subjects, check_room_can_be_set, check_teacher_can_teach
+    create_scheduled_subjects, check_room_can_be_set, check_teacher_can_teach, check_hour_is_available
 from .state import Action
 
 
@@ -51,8 +51,8 @@ class GeneticAlgorithm:
                     break
 
     def mutate_sch_subject(self, sch_subject):
-        teachers = sch_subject.subject.teachers
-        rooms = Room.objects.filter(room_type=sch_subject.type)
+        teachers = list(sch_subject.subject.teachers.all())
+        rooms = list(Room.objects.filter(room_type=sch_subject.type))
         if sch_subject.type == ScheduledSubject.LABORATORY:
             print("Make steps to mutate laboratory")
             other_subjects_in_plan = self.scheduled_subjects[sch_subject.plan.title]
@@ -61,10 +61,38 @@ class GeneticAlgorithm:
                 room_new = random.choice(rooms)
                 teacher_new = random.choice(teachers)
                 new_day = random.choice(self.days)
-                # ustalenie dostepnych godzin w dniu
-                # losowanie sposrod dostepnych
-                # jesli wszystkie warunki sa git to break (check_room_can_be_set, check_teacher_can_teach)
 
+                available_hours = []
+                for hour in range(self.min_hour, self.max_hour):
+                    if check_hour_is_available(hour, other_subjects_in_plan[new_day], sch_subject.how_long):
+                        available_hours.append(hour)
+
+                if len(available_hours) < 1:
+                    continue
+
+                start_hour = time(random.choice(available_hours), 0, 0)
+                end_hour = time(start_hour.hour + sch_subject.how_long, 0, 0)
+                older_start_hour = sch_subject.whenStart
+                older_end_hour = sch_subject.whenFinnish
+                older_day = sch_subject.dayOfWeek
+
+                sch_subject.whenStart = start_hour
+                sch_subject.whenFinnish = end_hour
+                sch_subject.dayOfWeek = new_day
+                if check_teacher_can_teach(sch_subject, self.scheduled_subjects_to_teachers[teacher_new]) \
+                        and check_room_can_be_set(sch_subject, self.scheduled_subjects_to_rooms[room_new]):
+                    self.scheduled_subjects_to_teachers[sch_subject.teacher].remove(sch_subject)
+                    self.scheduled_subjects_to_rooms[sch_subject.room].remove(sch_subject)
+                    self.scheduled_subjects_to_teachers[teacher_new].append(sch_subject)
+                    self.scheduled_subjects_to_rooms[room_new].append(sch_subject)
+                    sch_subject.teacher = teacher_new
+                    sch_subject.room = room_new
+                    print("mutation for lab: " + str(sch_subject) + "; was made.")
+                    break
+                else:
+                    sch_subject.whenStart = older_start_hour
+                    sch_subject.whenFinnish = older_end_hour
+                    sch_subject.dayOfWeek = older_day
         else:
             print("Make steps to mutate lecture")
             # to samo, tylko, ze modyfikacja wszystkich pozostalych wykladow
@@ -116,8 +144,14 @@ class GeneticAlgorithm:
         scheduled_subject.dayOfWeek = action.day
         scheduled_subject.whenStart = action.time
         scheduled_subject.whenFinnish = time(action.time.hour + scheduled_subject.how_long, 0, 0)
-        scheduled_subject.teacher = action.teacher
+
+        self.scheduled_subjects_to_rooms[scheduled_subject.room].remove(scheduled_subject)
         scheduled_subject.room = action.room
+        self.scheduled_subjects_to_rooms[action.room].append(scheduled_subject)
+
+        self.scheduled_subjects_to_teachers[scheduled_subject.teacher].remove(scheduled_subject)
+        scheduled_subject.teacher = action.teacher
+        self.scheduled_subjects_to_teachers[action.teacher].append(scheduled_subject)
 
 
 class GeneticAlgorithmRunner:
@@ -138,8 +172,8 @@ class GeneticAlgorithmRunner:
         logger.log(level=logger.INFO, msg="the case: " + str(case))
 
         tries_for_generating_plan = 0
-        while result == {
-            "Exception"} and tries_for_generating_plan < GeneticAlgorithmRunner.TRIES_FOR_NEW_PLAN_CREATION:
+        while result == {"Exception"} \
+                and tries_for_generating_plan < GeneticAlgorithmRunner.TRIES_FOR_NEW_PLAN_CREATION:
             try:
                 fields_of_study = list(FieldOfStudy.objects.all())
                 plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
@@ -174,8 +208,8 @@ class GeneticAlgorithmRunner:
         logger.log(level=logger.INFO, msg="the case: " + str(case))
 
         tries_for_generating_plan = 0
-        while result == {
-            "Exception"} and tries_for_generating_plan < GeneticAlgorithmRunner.TRIES_FOR_NEW_PLAN_CREATION:
+        while result == {"Exception"} \
+                and tries_for_generating_plan < GeneticAlgorithmRunner.TRIES_FOR_NEW_PLAN_CREATION:
             try:
                 first_plan = RandomPlanGenerator(teachers, plans, rooms)
                 result = first_plan.generate_plan(min_hour, max_hour)
