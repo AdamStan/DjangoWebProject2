@@ -6,7 +6,7 @@ from entities.models import FieldOfStudy, Teacher, Room, ScheduledSubject, Plan
 
 from .random_algorithm import RandomPlanGenerator
 from .algorithms_helper import create_empty_plans, get_events_by_day, check_action_can_be_done, \
-    create_scheduled_subjects
+    create_scheduled_subjects, check_room_can_be_set, check_teacher_can_teach
 from .state import Action
 
 
@@ -19,6 +19,8 @@ class GeneticAlgorithm:
         self.mutation_rate = chance_of_mutation
         self.min_hour = min_hour
         self.max_hour = max_hour
+        # TODO: pass as parameter
+        self.days = [1, 2, 3, 4, 5]
 
         self.plans = dict()
         for plan in plans:
@@ -42,7 +44,31 @@ class GeneticAlgorithm:
             self.mutations()
 
     def mutations(self):
-        pass
+        for plan_title, scheduled_subjects in self.scheduled_subjects.items():
+            for sch_subject in scheduled_subjects:
+                if self.mutation_rate > random.random():
+                    self.mutate_sch_subject(sch_subject)
+                    break
+
+    def mutate_sch_subject(self, sch_subject):
+        teachers = sch_subject.subject.teachers
+        rooms = Room.objects.filter(room_type=sch_subject.type)
+        if sch_subject.type == ScheduledSubject.LABORATORY:
+            print("Make steps to mutate laboratory")
+            other_subjects_in_plan = self.scheduled_subjects[sch_subject.plan.title]
+            other_subjects_in_plan = get_events_by_day(other_subjects_in_plan)
+            while True:
+                room_new = random.choice(rooms)
+                teacher_new = random.choice(teachers)
+                new_day = random.choice(self.days)
+                # ustalenie dostepnych godzin w dniu
+                # losowanie sposrod dostepnych
+                # jesli wszystkie warunki sa git to break (check_room_can_be_set, check_teacher_can_teach)
+
+        else:
+            print("Make steps to mutate lecture")
+            # to samo, tylko, ze modyfikacja wszystkich pozostalych wykladow
+            pass
 
     def crossovers(self):
         for plan_list in self.plans.values():
@@ -69,7 +95,8 @@ class GeneticAlgorithm:
                                                 sch_lab1.teacher, sch_lab1.room)
                     action_from_2_to_1 = Action(plan1, sch_lab1, sch_lab2.whenStart.hour, sch_lab2.dayOfWeek,
                                                 sch_lab2.teacher, sch_lab2.room)
-                    # TODO: how to not check changing laboratory?
+                    # how to not check changing laboratory? -
+                    # doesn't matter, if laboratories are in the same time there is no reason to swap
                     if check_action_can_be_done(action_from_1_to_2, sch_subjects_plan2_by_days) and \
                             check_action_can_be_done(action_from_2_to_1, sch_subjects_plan1_by_days):
                         print("crossover_works")
