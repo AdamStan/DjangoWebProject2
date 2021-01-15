@@ -284,21 +284,21 @@ class GeneticAlgorithmRunner:
 
     def save_the_result(self):
         # TODO: saves values from self.algorithm
-        # if self.the_best_result:
-        #     plans = self.the_best_result[0].plans
-        #     sch_subject_plans = self.the_best_result[0].subjects_in_plans
-        #     ScheduledSubject.objects.all().delete()
-        #     Plan.objects.all().delete()
-        #     # SAVE
-        #     for plan in plans:
-        #         plan.save()
-        #     for i in range(len(plans)):
-        #         title = sch_subject_plans[i][0].plan.title
-        #         plan = Plan.objects.get(title=title)
-        #         for sch_subject in sch_subject_plans[i]:
-        #             sch_subject.plan = plan
-        #             sch_subject.save()
-        logger.log(level=logger.INFO, msg="Turn off!")
+        if self.the_best_result:
+            plans = self.the_best_result[0].plans
+            sch_subject_plans = self.the_best_result[0].subjects_in_plans
+            ScheduledSubject.objects.all().delete()
+            Plan.objects.all().delete()
+            # SAVE
+            for plan in plans:
+                plan.save()
+            for i in range(len(plans)):
+                title = sch_subject_plans[i][0].plan.title
+                plan = Plan.objects.get(title=title)
+                for sch_subject in sch_subject_plans[i]:
+                    sch_subject.plan = plan
+                    sch_subject.save()
+        print("result was saved")
 
     def make_generations(self, min_hour, max_hour):
         if self.the_best_result:
