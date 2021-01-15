@@ -6,7 +6,8 @@ from entities.models import FieldOfStudy, Teacher, Room, ScheduledSubject, Plan
 
 from .random_algorithm import RandomPlanGenerator
 from .algorithms_helper import create_empty_plans, get_events_by_day, check_action_can_be_done, \
-    create_scheduled_subjects, check_room_can_be_set, check_teacher_can_teach, check_hour_is_available
+    create_scheduled_subjects, check_room_can_be_set, check_teacher_can_teach, check_hour_is_available, \
+    get_the_same_lecture
 from .state import Action
 
 
@@ -95,8 +96,65 @@ class GeneticAlgorithm:
                     sch_subject.dayOfWeek = older_day
         else:
             print("Make steps to mutate lecture")
-            # to samo, tylko, ze modyfikacja wszystkich pozostalych wykladow
-            pass
+            current_plan = sch_subject.plan
+            plan_all = self.plans[str(current_plan.fieldOfStudy) + str(current_plan.semester)]
+            plans_sch_subjects = dict()
+            for plan in plan_all:
+                plans_sch_subjects[plan.title] = get_events_by_day(self.scheduled_subjects[plan.title])
+
+            while True:
+                room_new = random.choice(rooms)
+                teacher_new = random.choice(teachers)
+                new_day = random.choice(self.days)
+
+                available_hours = []
+                for hour in range(self.min_hour, self.max_hour):
+                    is_available = True
+                    for plan_sch_subjects_ in plans_sch_subjects.values():
+                        is_available = is_available and check_hour_is_available(hour, plan_sch_subjects_[new_day],
+                                                                                sch_subject.how_long)
+                    if is_available:
+                        available_hours.append(hour)
+
+                if len(available_hours) < 1:
+                    continue
+
+                start_hour = time(random.choice(available_hours), 0, 0)
+                end_hour = time(start_hour.hour + sch_subject.how_long, 0, 0)
+                older_start_hour = sch_subject.whenStart
+                older_end_hour = sch_subject.whenFinnish
+                older_day = sch_subject.dayOfWeek
+
+                sch_subject.whenStart = start_hour
+                sch_subject.whenFinnish = end_hour
+                sch_subject.dayOfWeek = new_day
+
+                if check_teacher_can_teach(sch_subject, self.scheduled_subjects_to_teachers[teacher_new]) \
+                        and check_room_can_be_set(sch_subject, self.scheduled_subjects_to_rooms[room_new]):
+                    lectures_to_modify = list()
+                    for plan in plan_all:
+                        lecture = get_the_same_lecture(sch_subject, self.scheduled_subjects[plan.title])
+                        if lecture is None:
+                            print("It shouldn't happened!")
+                            raise Exception("This lecture: " + str(sch_subject) + ", was not found in plan: " +
+                                            str(plan))
+                        lectures_to_modify.append(lecture)
+                    for lecture in lectures_to_modify:
+                        self.scheduled_subjects_to_teachers[lecture.teacher].remove(lecture)
+                        self.scheduled_subjects_to_rooms[lecture.room].remove(lecture)
+                        self.scheduled_subjects_to_teachers[teacher_new].append(lecture)
+                        self.scheduled_subjects_to_rooms[room_new].append(lecture)
+                        lecture.teacher = teacher_new
+                        lecture.room = room_new
+                        lecture.whenStart = start_hour
+                        lecture.whenFinnish = end_hour
+                        lecture.dayOfWeek = new_day
+                    print("mutation for lecture: " + str(sch_subject) + "; was made.")
+                    break
+                else:
+                    sch_subject.whenStart = older_start_hour
+                    sch_subject.whenFinnish = older_end_hour
+                    sch_subject.dayOfWeek = older_day
 
     def crossovers(self):
         for plan_list in self.plans.values():

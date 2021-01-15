@@ -105,3 +105,10 @@ def check_hour_is_available(hour, scheduled_subjects, how_long):
             return False
 
     return True
+
+
+def get_the_same_lecture(lecture, scheduled_subjects):
+    for sch_subject in scheduled_subjects:
+        if lecture.subject == sch_subject.subject and sch_subject.type == ScheduledSubject.LECTURE:
+            return sch_subject
+    return None
