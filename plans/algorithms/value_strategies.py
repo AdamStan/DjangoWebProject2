@@ -1,6 +1,6 @@
 import sys
 
-from .algorithms_helper import get_events_by_day, check_action_can_be_done
+from .algorithms_helper import check_action_can_be_done
 
 
 class ValueOfPlanStrategy1:

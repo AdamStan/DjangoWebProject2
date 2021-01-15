@@ -71,3 +71,44 @@ def get_events_by_day(subjects_in_plan):
             if subject.dayOfWeek == day:
                 subjects_by_days[day].append(subject)
     return subjects_by_days
+
+
+def check_room_can_be_set(sch_subject, scheduled_subjects_in_room):
+    for event in scheduled_subjects_in_room:
+        difference_between_starts = abs(event.whenStart.hour - sch_subject.whenStart.hour)
+        difference_between_ends = abs(event.whenFinnish.hour - sch_subject.whenFinnish.hour)
+        is_the_same_day = event.dayOfWeek == sch_subject.dayOfWeek
+        if is_the_same_day and \
+                (difference_between_starts + difference_between_ends) < (event.how_long + sch_subject.how_long):
+            return False
+
+    return True
+
+
+def check_teacher_can_teach(sch_subject, teachers_subjects):
+    for event in teachers_subjects:
+        difference_between_starts = abs(event.whenStart.hour - sch_subject.whenStart.hour)
+        difference_between_ends = abs(event.whenFinnish.hour - sch_subject.whenFinnish.hour)
+        is_the_same_day = event.dayOfWeek == sch_subject.dayOfWeek
+        if is_the_same_day and \
+                (difference_between_starts + difference_between_ends) < (event.how_long + sch_subject.how_long):
+            return False
+
+    return True
+
+
+def check_hour_is_available(hour, scheduled_subjects, how_long):
+    for event in scheduled_subjects:
+        difference_between_starts = abs(event.whenStart.hour - hour)
+        difference_between_ends = abs(event.whenFinnish.hour - (hour + how_long))
+        if (difference_between_starts + difference_between_ends) < (event.how_long + how_long):
+            return False
+
+    return True
+
+
+def get_the_same_lecture(lecture, scheduled_subjects):
+    for sch_subject in scheduled_subjects:
+        if lecture.subject == sch_subject.subject and sch_subject.type == ScheduledSubject.LECTURE:
+            return sch_subject
+    return None
