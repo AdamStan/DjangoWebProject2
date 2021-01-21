@@ -9,7 +9,3 @@ class TestAllParameters(unittest.TestCase):
         self.assertEqual(parameters.number_of_generation, 100)
         self.assertEqual(parameters.number_of_mutation, 0.5)
         self.assertEqual(parameters.number_of_crossover, 0.2)
-
-
-if __name__ == '__main__':
-    unittest.main()
