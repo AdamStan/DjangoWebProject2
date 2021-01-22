@@ -36,7 +36,7 @@ class RandomAlgorithmTests(BaseTest):
         fields = FieldOfStudy.objects.all()
         results = list()
         before = time.time_ns()
-        for i in range(1):
+        for i in range(100):
             results += self.run_algorithm(fields, teachers, rooms)
         after = time.time_ns()
         # odfiltrowanie listy z Exception...
@@ -48,20 +48,14 @@ class RandomAlgorithmTests(BaseTest):
             else:
                 good_results.append(res[1])
 
-        print(error_rate)
         min_value = min(good_results)
-        print(min_value)
         max_value = max(good_results)
-        print(max_value)
         mean_value = mean(good_results)
-        print(mean_value)
-
         time_in_seconds = (after - before) / 1_000_000_000
-        print(time_in_seconds)
 
-        report = BasicAlgorithmReport(str(time), str(mean_value), "random_algo_test",
-                                      other_info_dict={"errors": str(error_rate), "min_value": str(min_value),
-                                                       "max_value": str(max_value)})
+        report = BasicAlgorithmReport(time_in_seconds, mean_value, "random_algo_test",
+                                      other_info_dict={"errors": error_rate, "min_value": min_value,
+                                                       "max_value": max_value})
         report.create_report()
 
     def run_algorithm(self, fields, teachers, rooms):
