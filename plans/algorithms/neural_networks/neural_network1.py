@@ -5,11 +5,10 @@ from entities.models import FieldOfStudy, Teacher, Room, Plan, ScheduledSubject
 from plans.algorithms.algorithms_helper import check_action_can_be_done, create_scheduled_subjects, create_empty_plans, \
     get_events_by_day
 from plans.algorithms.neural_networks.neural_network_algorithm import NNPlanGeneratorAlgorithmBase
-from plans.algorithms.state import Environment
 
 
 class NeuralNetworkForOneInput(NNPlanGeneratorAlgorithmBase):
-    model = keras.models.load_model("model-the-best-score.h5")
+    model = keras.models.load_model("plans/algorithms/neural_networks/model-the-best-score.h5")
 
     def __init__(self, teachers, rooms, plans,
                  scheduled_subjects_in_plans, min_hour=8, max_hour=19):
