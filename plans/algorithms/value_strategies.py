@@ -56,3 +56,12 @@ class ValueOfPlanStrategy1:
 
                 value += max_hour - min_hour - how_long_subjects_take
         return value
+
+
+class EmptyStrategy:
+
+    def get_value_of_plan(self, subjects_by_days):
+        return 0
+
+    def get_value_of_plan_after_action(self, subjects_by_days, action):
+        return 0

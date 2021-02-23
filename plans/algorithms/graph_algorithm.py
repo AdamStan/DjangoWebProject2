@@ -42,7 +42,7 @@ class GraphAlgorithm:
         self.save_result()
 
     def set_scheduled_subject(self, environment):
-        self.logger.log(logging.INFO, "Settings lessons to plans")
+        self.logger.log(logging.INFO, "Sets lessons to plans")
 
         for plan in self.plans:
             scheduled_subjects_in_plan = self.scheduled_subjects[plan.title]

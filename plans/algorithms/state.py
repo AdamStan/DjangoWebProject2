@@ -59,17 +59,11 @@ class Environment:
         return self.scheduled_subjects
 
     def get_available_actions(self, plan, scheduled_subject):
-        actions = list()
         available_actions = list()
         teachers_for_sch = Teacher.objects.filter(subject=scheduled_subject.subject)
         rooms_for_sch = Room.objects.filter(room_type=scheduled_subject.type)
 
-        for day in self.days:
-            for hour in range(self.min_hour, self.max_hour):
-                for room in rooms_for_sch:
-                    for teacher in teachers_for_sch:
-                        actions.append(Action(plan, scheduled_subject, hour, day, teacher, room))
-
+        actions = self.prepare_actions(plan, scheduled_subject, teachers_for_sch, rooms_for_sch)
         for action in actions:
             subjects_from_plan = self.scheduled_subjects[plan.title]
             subjects_for_teacher = self.sch_subjects_teachers[action.teacher.user.id]
@@ -80,6 +74,15 @@ class Environment:
                 available_actions.append(action)
 
         return available_actions
+
+    def prepare_actions(self, plan, scheduled_subject, teachers_for_sch, rooms_for_sch):
+        actions = []
+        for day in self.days:
+            for hour in range(self.min_hour, self.max_hour):
+                for room in rooms_for_sch:
+                    for teacher in teachers_for_sch:
+                        actions.append(Action(plan, scheduled_subject, hour, day, teacher, room))
+        return actions
 
     def do_action_for_other_lectures(self, action):
         lectures = dict()

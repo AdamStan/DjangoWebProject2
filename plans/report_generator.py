@@ -37,7 +37,7 @@ class BasicAlgorithmReport:
             sh.write(3 + m, 1, value)
 
         now = datetime.now()
-        current_time = now.strftime("%d-%m-%Y %H:%M:%S")
+        current_time = now.strftime("%d-%m-%Y %H-%M-%S")
         print("Current Time =", current_time)
         book.save("report_" + current_time + "_.xls")
 
