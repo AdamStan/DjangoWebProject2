@@ -9,6 +9,8 @@ from ..report_generator import BasicAlgorithmReport
 
 
 class RandomAlgorithmTests(BaseTest):
+    HOW_MANY_TIMES_RUN = 100
+
     def setUp(self):
         super(RandomAlgorithmTests, self).setUp()
         self.how_many_plans = 3
@@ -36,7 +38,7 @@ class RandomAlgorithmTests(BaseTest):
         fields = FieldOfStudy.objects.all()
         results = list()
         before = time.time_ns()
-        for i in range(100):
+        for i in range(RandomAlgorithmTests.HOW_MANY_TIMES_RUN):
             results += self.run_algorithm(fields, teachers, rooms)
         after = time.time_ns()
         # odfiltrowanie listy z Exception...
@@ -52,10 +54,12 @@ class RandomAlgorithmTests(BaseTest):
         max_value = max(good_results)
         mean_value = mean(good_results)
         time_in_seconds = (after - before) / 1_000_000_000
+        times_was_run = RandomAlgorithmTests.HOW_MANY_TIMES_RUN * self.tries
 
         report = BasicAlgorithmReport(time_in_seconds, mean_value, "random_algo_test",
-                                      other_info_dict={"errors": error_rate, "min_value": min_value,
-                                                       "max_value": max_value})
+                                      other_info_dict={"times_was_run": times_was_run,
+                                                       "good_results": len(good_results), "errors": error_rate,
+                                                       "min_value": min_value, "max_value": max_value})
         report.create_report()
 
     def run_algorithm(self, fields, teachers, rooms):
