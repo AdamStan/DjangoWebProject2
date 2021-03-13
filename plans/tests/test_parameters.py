@@ -1,4 +1,4 @@
-from plans.plan_parameters import *
+from plans.plan_parameters import AllParameters
 import unittest
 
 

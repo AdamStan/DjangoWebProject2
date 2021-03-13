@@ -41,8 +41,6 @@ class RandomPlanGenerator:
             self.subjects_for_teachers[teacher] = []
         self.plan_qualifier = QualityPlanFunction(self.subjects_in_plans)
 
-        print("Initialize with success")
-
     def generate_plan(self, min_hour=8, max_hour=19, days=[1, 2, 3, 4, 5]):
         """
         Creates timetable first time
@@ -65,7 +63,6 @@ class RandomPlanGenerator:
         :param days: days in week 0 => sunday, 6=> saturday
         :return None:
         """
-        print("--- set lectures time ---")
         dict_lectures, dict_group_lectures = self.prepare_lectures()
         for sch_subject_list in dict_group_lectures.values():
             tries = HOW_MANY_TRIES
@@ -101,7 +98,6 @@ class RandomPlanGenerator:
         """
         dict_laboratories, dict_all = self.prepare_laboratories()
 
-        print("--- set laboratories time ---")
         for key, subject in dict_laboratories.items():
             tries = HOW_MANY_TRIES
             while tries > 0:

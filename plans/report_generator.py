@@ -23,11 +23,6 @@ class BasicAlgorithmReport:
         z_desc = 'quality_function_name'
         desc = [x_desc, y_desc, z_desc]
 
-        col1_name = 'Stimulus Time'
-        col2_name = 'Reaction Time'
-
-        # You may need to group the variables together
-        # for n, (v_desc, v) in enumerate(zip(desc, variables)):
         for n, (v_desc, v) in enumerate(zip(desc, variables)):
             sh.write(n, 0, v_desc)
             sh.write(n, 1, v)
@@ -39,7 +34,9 @@ class BasicAlgorithmReport:
         now = datetime.now()
         current_time = now.strftime("%d-%m-%Y %H-%M-%S")
         print("Current Time =", current_time)
-        book.save("report_" + current_time + "_.xls")
+        file_name = "report_" + current_time + "_.xls"
+        book.save(file_name)
+        return file_name
 
     def send_on_email(self):
         pass
