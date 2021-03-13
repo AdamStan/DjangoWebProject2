@@ -2,6 +2,7 @@ import logging
 from entities.models import ScheduledSubject, Plan
 from plans.algorithms.state import Environment
 from plans.algorithms.value_strategies import ValueOfPlanStrategy1
+from plans.algorithms.algorithms_helper import get_events_by_day
 
 
 class NNPlanGeneratorAlgorithmBase:
@@ -48,3 +49,10 @@ class NNPlanGeneratorAlgorithmBase:
         for plan_sch_subjects in self.scheduled_subjects.values():
             for sch_subject in plan_sch_subjects:
                 sch_subject.save()
+
+    def value_of_plans(self):
+        value = 0
+        for plan in self.plans:
+            subjects_in_plan_by_days = get_events_by_day(self.scheduled_subjects[plan.title])
+            value += self.strategy.get_value_of_plan(subjects_in_plan_by_days)
+        return value

@@ -2,13 +2,12 @@ import logging
 from tensorflow import keras
 import random
 from entities.models import FieldOfStudy, Teacher, Room, Plan, ScheduledSubject
-from plans.algorithms.algorithms_helper import check_action_can_be_done, create_scheduled_subjects, create_empty_plans, \
-    get_events_by_day
+from plans.algorithms.algorithms_helper import check_action_can_be_done, create_scheduled_subjects, create_empty_plans
 from plans.algorithms.neural_networks.neural_network_algorithm import NNPlanGeneratorAlgorithmBase
 
 
 class NeuralNetworkForOneInput(NNPlanGeneratorAlgorithmBase):
-    model = keras.models.load_model("plans/algorithms/neural_networks/model-the-best-score.h5")
+    model = keras.models.load_model("plans/algorithms/neural_networks/model-1-input-the-best-score.h5")
 
     def __init__(self, teachers, rooms, plans,
                  scheduled_subjects_in_plans, min_hour=8, max_hour=19):
@@ -55,13 +54,6 @@ class NeuralNetworkForOneInput(NNPlanGeneratorAlgorithmBase):
                 index_max = i
         return available_actions[index_max]
 
-    def value_of_plans(self):
-        value = 0
-        for plan in self.plans:
-            subjects_in_plan_by_days = get_events_by_day(self.scheduled_subjects[plan.title])
-            value += self.strategy.get_value_of_plan(subjects_in_plan_by_days)
-        return value
-
 
 class NeuralNetworkOneInputRunner:
     def __init__(self):
@@ -99,3 +91,30 @@ class NeuralNetworkOneInputRunner:
 
         algorithm = NeuralNetworkForOneInput(teachers, rooms, plans, scheduled_subject, min_hour, max_hour)
         algorithm.create_plan()
+
+
+class NeuralNetworkRunner:
+    def __init__(self, type_of_neural_network):
+        self.type_of_neural_network = type_of_neural_network
+        self.the_best_result = None
+
+    def create_plan_async(self, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, min_hour=8, max_hour=19):
+        print("Will create a plan for: ")
+        runner = None
+        if self.type_of_neural_network == 1:
+            runner = NeuralNetworkOneInputRunner()
+            runner.create_plan_async(winter_or_summer, how_many_plans, min_hour, max_hour)
+        elif self.type_of_neural_network == 2:
+            pass
+        elif self.type_of_neural_network == 3:
+            pass
+        else:
+            raise Exception("There is no type for " + str(self.type_of_neural_network) + "!!!")
+        self.the_best_result = runner.the_best_result
+        print(self.type_of_neural_network)
+
+    def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
+        print("Will create a plan without deleting for: ")
+        print(self.type_of_neural_network)
+
+

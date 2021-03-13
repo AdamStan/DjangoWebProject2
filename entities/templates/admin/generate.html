@@ -9,25 +9,37 @@
     function doWhenImprovement() {
         document.getElementById("improvement-parameter").style.display = "block";
         modifyVisibilityForGeneticFields("none");
+        modifyVisibilityForNeuralFields("none");
         document.getElementById("generatePlanButton").disabled = false;
     }
 
     function doWhenOthers() {
         document.getElementById("improvement-parameter").style.display = "none";
         modifyVisibilityForGeneticFields("none");
+        modifyVisibilityForNeuralFields("none");
         document.getElementById("generatePlanButton").disabled = false;
     }
 
     function doWhenGenetic() {
         document.getElementById("improvement-parameter").style.display = "none";
         modifyVisibilityForGeneticFields("block");
+        modifyVisibilityForNeuralFields("none");
+        document.getElementById("generatePlanButton").disabled = false;
+    }
+
+    function doWhenNeuralNetwork() {
+        document.getElementById("improvement-parameter").style.display = "none";
+        modifyVisibilityForGeneticFields("none");
+        modifyVisibilityForNeuralFields("block");
         document.getElementById("generatePlanButton").disabled = false;
     }
 
     function modifyVisibilityForGeneticFields(option) {
-        document.getElementById("genetic-parameter1").style.display = option;
-        document.getElementById("genetic-parameter2").style.display = option;
-        document.getElementById("genetic-parameter3").style.display = option;
+        document.getElementById("genetic-parameters").style.display = option;
+    }
+
+    function modifyVisibilityForNeuralFields(option) {
+        document.getElementById("nn-parameter").style.display = option;
     }
 </script>
 <style>
@@ -44,86 +56,90 @@
     </div>
     {% csrf_token %}
     <div class="table-responsive">
-            <table>
-            <tr>
-                <td> First hour:  </td>
-                <td><input class="form-control" type="number" name="first_hour" min="1" max="22" value="8" placeholder="cannot be empty"/></td>
-            </tr>
-            <tr>
-                <td> Last hour: </td>
-                <td><input class="form-control" type="number" name="last_hour" min="1" max="23" value="19" placeholder="cannot be empty"/></td>
-            </tr>
-            <tr>
-                <td> Semester: </td>
-                <td>
-                    <select class="btn background-second" placeholder="choose semester" name="semester_type">
-                        <option value="1" selected="selected"> Winter </option>
-                        <option value="2"> Summer </option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td> How many groups for semester: </td>
-                <td><input class="form-control" type="number" name="how_many_groups" min="1" value="3"/></td>
-            </tr>
-            <tr>
-                <td> Do you want to delete a plans?  </td>
-                <td><input class="form-control-sm" type="checkbox" name="if_delete" checked="true"/></td>
-            </tr>
-            <tr>
-                <td><br></td>
-            </tr>
-            <tr>
-                <td><p class="text-xl-left font-weight-bold"> Choose one of the below algorithms: </p><td>
-            </tr>
-            <tr>
-                <td> <input type="radio" id="random" name="algorithm" value="algorithm-random" onclick="doWhenOthers(this)" /> <label for="random"> generate random </label></td>
-            </tr>
-            <tr>
-                <td> <input type="radio" id="improvement" name="algorithm" value="algorithm-with-improvement" onclick="doWhenImprovement(this)"/> <label for="improvement"> generate with improvement</label> </td>
-            </tr>
-            <tr>
-                <td> <input type="radio" id="genetic" name="algorithm" value="algorithm-genetic" onclick="doWhenGenetic(this)"/> <label for="genetic"> genetic algorithm </label> </td>
-            </tr>
-            <tr>
-                <td> <input type="radio" id="neural" name="algorithm" value="algorithm-nn" onclick="doWhenOthers(this)"/> <label for="neural"> neural networks </label> </td>
-            </tr>
-            <tr>
-                <td> <input type="radio" id="graph" name="algorithm" value="algorithm-graph" onclick="doWhenOthers(this)"/> <label for="graph"> graph algorithm </label> </td>
-            </tr>
-            <!-- parameters -->
-            <tr class="hidden" id="improvement-parameter">
-                <td> How many tries: </td>
-                <td><input class="form-control" type="number" name="number_of_generation" min="1" max="20000" value="1000" placeholder=""/></td>
-            </tr>
-            <tr class="hidden" id="genetic-parameter1">
-                <td> How many generations: </td>
-                <td><input class="form-control" type="number" name="number_of_generation" min="1" max="20000" value="20" placeholder=""/></td>
-            </tr>
-            <tr class="hidden" id="genetic-parameter2">
-                <td> Chance of crossover: </td>
-                <td><input class="form-control" type="number" name="number_of_crossover" min="0.01" max="1" value="0.5" step="0.01" placeholder=""/></td>
-            </tr>
-            <tr class="hidden" id="genetic-parameter3">
-                <td> Chance of mutation: </td>
-                <td><input class="form-control" type="number" name="number_of_mutation" min="0.01" max="1" value="0.1" step="0.01" placeholder=""/></td>
-            </tr>
-            <tr>
-                 <td><button id="generatePlanButton" class="btn background-second" type="submit" name="action" value="generate" disabled="true"> Generate </button></td>
-            </tr>
-        </table>
+        <div class="table-row">
+            <div class="table-col"> First hour:  </div>
+            <div class="table-col"><input class="form-control" type="number" name="first_hour" min="1" max="22" value="8" placeholder="cannot be empty"/></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> Last hour: </div>
+            <div class="table-col"><input class="form-control" type="number" name="last_hour" min="1" max="23" value="19" placeholder="cannot be empty"/></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> Semester: </div>
+            <div class="table-col">
+                <select class="btn background-second form-select" placeholder="choose semester" name="semester_type">
+                    <option value="1" selected="selected"> Winter </option>
+                    <option value="2"> Summer </option>
+                </select>
+            </div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> How many groups for semester: </div>
+            <div class="table-col"><input class="form-control" type="number" name="how_many_groups" min="1" value="3"/></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> Do you want to delete a plans?  </div>
+            <div class="table-col"><input class="form-control-sm" type="checkbox" name="if_delete" checked="true"/></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"><br> </div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"><p class="text-xl-left font-weight-bold"> Choose one of the below algorithms: </p></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> <input type="radio" id="random" name="algorithm" value="algorithm-random" onclick="doWhenOthers(this)" /> <label for="random"> generate random </label></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> <input type="radio" id="improvement" name="algorithm" value="algorithm-with-improvement" onclick="doWhenImprovement(this)"/> <label for="improvement"> generate with improvement</label> </div>
+        </div>
+        <div class="table-row hidden" id="improvement-parameter">
+            <div class="table-col"> How many tries: </div>
+            <div class="table-col"><input class="form-control" type="number" name="number_of_generation" min="1" max="20000" value="1000" placeholder=""/></div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> <input type="radio" id="genetic" name="algorithm" value="algorithm-genetic" onclick="doWhenGenetic(this)"/> <label for="genetic"> genetic algorithm </label> </div>
+        </div>
+        <div class="hidden" id="genetic-parameters">
+            <div class="table-row" id="genetic-parameter1">
+                <div class="table-col"> How many generations: </div>
+                <div class="table-col"><input class="form-control" type="number" name="number_of_generation" min="1" max="20000" value="20" placeholder=""/></div>
+            </div>
+            <div class="table-row" id="genetic-parameter2">
+                <div class="table-col"> Chance of crossover: </div>
+                <div class="table-col"><input class="form-control" type="number" name="number_of_crossover" min="0.01" max="1" value="0.5" step="0.01" placeholder=""/></div>
+            </div>
+            <div class="table-row" id="genetic-parameter3">
+                <div class="table-col"> Chance of mutation: </div>
+                <div class="table-col"><input class="form-control" type="number" name="number_of_mutation" min="0.01" max="1" value="0.1" step="0.01" placeholder=""/></div>
+            </div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> <input type="radio" id="neural" name="algorithm" value="algorithm-nn" onclick="doWhenNeuralNetwork(this)"/> <label for="neural"> neural networks </label> </div>
+        </div>
+        <div class="table-row hidden" id="nn-parameter">
+            <div class="table-col">
+                <select class="btn background-second form-select" placeholder="choose method" name="neural_network_type">
+                    <option value="1" selected="selected"> One input </option>
+                    <option value="2"> Three input with concatenation </option>
+                    <option value="3"> Three input with LSTM </option>
+                </select>
+            </div>
+        </div>
+        <div class="table-row">
+            <div class="table-col"> <input type="radio" id="graph" name="algorithm" value="algorithm-graph" onclick="doWhenOthers(this)"/> <label for="graph"> graph algorithm </label> </div>
+        </div>
+        <div class="table-row">
+             <div class="table-col"><button id="generatePlanButton" class="btn background-second" type="submit" name="action" value="generate" disabled="true"> Generate </button></div>
+        </div>
     </div>
 </form>
 <br/>
 <h1> New semester</h1>
 <form action="{% url 'entities:new_semester' %}" method="post">
     {% csrf_token %}
-    <div class="table-responsive">
-        <table>
-            <tr>
-                <td><button class="btn background-second" type="submit" name="action" value="add_new_semestr"> Start new semester </button></td>
-            </tr>
-        </table>
+    <div>
+        <p><button class="btn background-second" type="submit" name="action" value="add_new_semestr"> Start new semester </button></p>
     </div>
 </form>
 {% endblock %}
