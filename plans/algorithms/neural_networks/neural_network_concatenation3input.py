@@ -4,16 +4,23 @@ import random
 from entities.models import FieldOfStudy, Teacher, Room, Plan, ScheduledSubject
 from plans.algorithms.algorithms_helper import check_action_can_be_done, create_scheduled_subjects, create_empty_plans
 from plans.algorithms.neural_networks.neural_network_algorithm import NNPlanGeneratorAlgorithmBase
+import numpy as np
 
 
 class NeuralNetworkForThreeInputConcatenation(NNPlanGeneratorAlgorithmBase):
-    model = keras.models.load_model("plans/algorithms/neural_networks/model-3-input1.h5")
+    model = keras.models.load_model("plans/algorithms/neural_networks/model-3-input-concatenate.h5")
 
     def __init__(self, teachers, rooms, plans,
                  scheduled_subjects_in_plans, min_hour=8, max_hour=19):
         super(NeuralNetworkForThreeInputConcatenation, self).__init__(
             teachers, rooms, plans, scheduled_subjects_in_plans,
-            min_hour=8, max_hour=19)
+            min_hour=min_hour, max_hour=max_hour)
+        self.days = [1, 2, 3, 4, 5]
+        self.all_available_hours = [
+            self.create_all_available_hours(1),
+            self.create_all_available_hours(2),
+            self.create_all_available_hours(3)
+        ]
 
     def set_scheduled_subject(self, environment):
         self.logger.log(logging.INFO, "Starting scheduling using NN - 3 input")
@@ -50,6 +57,10 @@ class NeuralNetworkForThreeInputConcatenation(NNPlanGeneratorAlgorithmBase):
         available_hours_plan = self.get_time_list(actions_for_plan)
         available_hours_teacher = self.get_time_list(actions_for_teacher)
         available_hours_room = self.get_time_list(actions_for_room)
+
+        available_hours_plan = np.array(available_hours_plan).reshape(1, 165)
+        available_hours_teacher = np.array(available_hours_teacher).reshape(1, 165)
+        available_hours_room = np.array(available_hours_room).reshape(1, 165)
         output = NeuralNetworkForThreeInputConcatenation.model.predict([available_hours_plan,
                                                            available_hours_teacher,
                                                            available_hours_room])
@@ -60,12 +71,39 @@ class NeuralNetworkForThreeInputConcatenation(NNPlanGeneratorAlgorithmBase):
         return actions_for_plan[index_max]
 
     def get_time_list(self, actions):
+        all_possibilities = self.get_av_hours(actions[0].schedule_subject)
         available_hours = list()
         for action in actions:
             available_hours.append(action.day)
             available_hours.append(action.time.hour)
             available_hours.append(action.time.hour + action.schedule_subject.how_long)
-        return available_hours
+        ptm_index = 0
+        new_plan_to_manipulate = []
+        for i in range(0, len(all_possibilities), 3):
+            if all_possibilities[i] == available_hours[ptm_index] and \
+                    all_possibilities[i + 1] == available_hours[ptm_index + 1] and \
+                    all_possibilities[i + 2] == available_hours[ptm_index + 2]:
+                new_plan_to_manipulate.append(available_hours[ptm_index])
+                new_plan_to_manipulate.append(available_hours[ptm_index + 1])
+                new_plan_to_manipulate.append(available_hours[ptm_index + 2])
+                ptm_index += 3
+                if ptm_index >= len(available_hours):
+                    break
+            else:
+                new_plan_to_manipulate.append(0)
+                new_plan_to_manipulate.append(0)
+                new_plan_to_manipulate.append(0)
+        return new_plan_to_manipulate
+
+    def create_all_available_hours(self, how_long):
+        available_data = []
+        for d in self.days:
+            for h in range(self.min_hour, self.max_hour):
+                available_data.extend([d, h, h + how_long])
+        return available_data
+
+    def get_av_hours(self, sch_subject):
+        return self.all_available_hours[sch_subject.how_long]
 
 
 class NeuralNetworkThreeInputConcatenationRunner:

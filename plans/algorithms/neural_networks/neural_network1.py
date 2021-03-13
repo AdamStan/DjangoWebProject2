@@ -4,6 +4,8 @@ import random
 from entities.models import FieldOfStudy, Teacher, Room, Plan, ScheduledSubject
 from plans.algorithms.algorithms_helper import check_action_can_be_done, create_scheduled_subjects, create_empty_plans
 from plans.algorithms.neural_networks.neural_network_algorithm import NNPlanGeneratorAlgorithmBase
+from plans.algorithms.neural_networks.neural_network_concatenation3input import \
+    NeuralNetworkThreeInputConcatenationRunner
 
 
 class NeuralNetworkForOneInput(NNPlanGeneratorAlgorithmBase):
@@ -99,22 +101,33 @@ class NeuralNetworkRunner:
         self.the_best_result = None
 
     def create_plan_async(self, winter_or_summer=FieldOfStudy.WINTER, how_many_plans=3, min_hour=8, max_hour=19):
-        print("Will create a plan for: ")
-        runner = None
         if self.type_of_neural_network == 1:
             runner = NeuralNetworkOneInputRunner()
             runner.create_plan_async(winter_or_summer, how_many_plans, min_hour, max_hour)
         elif self.type_of_neural_network == 2:
-            pass
+            runner = NeuralNetworkThreeInputConcatenationRunner()
+            runner.create_plan_async(winter_or_summer, how_many_plans, min_hour, max_hour)
         elif self.type_of_neural_network == 3:
-            pass
+            # TODO: add neural network with LSTM!!!
+            raise Exception("3rd type not supported yet !!!")
         else:
             raise Exception("There is no type for " + str(self.type_of_neural_network) + "!!!")
         self.the_best_result = runner.the_best_result
         print(self.type_of_neural_network)
 
     def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
-        print("Will create a plan without deleting for: ")
+        if self.type_of_neural_network == 1:
+            runner = NeuralNetworkOneInputRunner()
+            runner.create_plan_async_without_deleting(min_hour, max_hour)
+        elif self.type_of_neural_network == 2:
+            runner = NeuralNetworkThreeInputConcatenationRunner()
+            runner.create_plan_async_without_deleting(min_hour, max_hour)
+        elif self.type_of_neural_network == 3:
+            # TODO: add neural network with LSTM!!!
+            raise Exception("3rd type not supported yet !!!")
+        else:
+            raise Exception("There is no type for " + str(self.type_of_neural_network) + "!!!")
+        self.the_best_result = runner.the_best_result
         print(self.type_of_neural_network)
 
 
