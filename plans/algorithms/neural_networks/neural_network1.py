@@ -13,7 +13,8 @@ class NeuralNetworkForOneInput(NNPlanGeneratorAlgorithmBase):
 
     def __init__(self, teachers, rooms, plans,
                  scheduled_subjects_in_plans, min_hour=8, max_hour=19):
-        super(NeuralNetworkForOneInput, self).__init__(teachers, rooms, plans, scheduled_subjects_in_plans, min_hour=8, max_hour=19)
+        super(NeuralNetworkForOneInput, self).__init__(teachers, rooms, plans, scheduled_subjects_in_plans, min_hour=8,
+                                                       max_hour=19)
 
     def set_scheduled_subject(self, environment):
         self.logger.log(logging.INFO, "Starting scheduling using NN - 1 input")
@@ -73,9 +74,7 @@ class NeuralNetworkOneInputRunner:
             plans_scheduled_subjects[plan.title] = scheduled_subjects
 
         algorithm = NeuralNetworkForOneInput(teachers, rooms, plans, plans_scheduled_subjects, min_hour, max_hour)
-        algorithm.create_plan()
-
-        self.the_best_result = "result", algorithm.value_of_plans()
+        self.the_best_result = algorithm.create_plan()
         algorithm.save_result()
 
     def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
@@ -92,7 +91,8 @@ class NeuralNetworkOneInputRunner:
             subject.dayOfWeek = None
 
         algorithm = NeuralNetworkForOneInput(teachers, rooms, plans, scheduled_subject, min_hour, max_hour)
-        algorithm.create_plan()
+        self.the_best_result = algorithm.create_plan()
+        algorithm.save_result()
 
 
 class NeuralNetworkRunner:

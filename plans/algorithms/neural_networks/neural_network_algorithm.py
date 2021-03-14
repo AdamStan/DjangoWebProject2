@@ -37,6 +37,7 @@ class NNPlanGeneratorAlgorithmBase:
         self.set_scheduled_subject(environment_sch_subjects)
 
         self.save_result()
+        return [self, self.value_of_plans()]
 
     def set_scheduled_subject(self, environment):
         raise Exception("set_scheduled_subject not implemented!")

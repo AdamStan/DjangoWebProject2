@@ -1,6 +1,6 @@
 from .random_algorithm import RandomPlanAlgorithm, RandomPlanGenerator
 from .improvement import AlgorithmsHelper, ImprovementAlgorithm
-from plans.algorithms.neural_networks.neural_network1 import NeuralNetworkRunner
+from plans.algorithms.neural_networks.neural_network1 import NeuralNetworkRunner, NeuralNetworkForOneInput
 from .genetic_algorithm import GeneticAlgorithmRunner
 from .graph_algorithm import GraphAlgorithmRunner
 from .algorithms_helper import create_empty_plans, create_scheduled_subjects
