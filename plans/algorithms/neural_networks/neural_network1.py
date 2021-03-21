@@ -9,12 +9,12 @@ from plans.algorithms.neural_networks.neural_network_concatenation3input import 
 
 
 class NeuralNetworkForOneInput(NNPlanGeneratorAlgorithmBase):
-    model = keras.models.load_model("plans/algorithms/neural_networks/model-1-input-the-best-score.h5")
+    model = keras.models.load_model("plans/algorithms/neural_networks/model-one-input.h5")
 
     def __init__(self, teachers, rooms, plans,
                  scheduled_subjects_in_plans, min_hour=8, max_hour=19):
-        super(NeuralNetworkForOneInput, self).__init__(teachers, rooms, plans, scheduled_subjects_in_plans, min_hour=8,
-                                                       max_hour=19)
+        super(NeuralNetworkForOneInput, self).__init__(teachers, rooms, plans, scheduled_subjects_in_plans,
+                                                       min_hour=min_hour, max_hour=max_hour)
 
     def set_scheduled_subject(self, environment):
         self.logger.log(logging.INFO, "Starting scheduling using NN - 1 input")
@@ -55,6 +55,8 @@ class NeuralNetworkForOneInput(NNPlanGeneratorAlgorithmBase):
         for i in range(len(output[0])):
             if output[0][index_max] < output[0][i]:
                 index_max = i
+        print("Max index: " + str(index_max))
+        print("Available actions length: " + str(len(available_actions)))
         return available_actions[index_max]
 
 

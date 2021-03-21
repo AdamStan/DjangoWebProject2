@@ -10,7 +10,7 @@ from ..report_generator import BasicAlgorithmReport
 
 
 class NeuralNetworkOneInputTests(BaseTest):
-    HOW_MANY_TIMES_RUN = 50
+    HOW_MANY_TIMES_RUN = 20
 
     def setUp(self):
         super(NeuralNetworkOneInputTests, self).setUp()
@@ -31,7 +31,7 @@ class NeuralNetworkOneInputTests(BaseTest):
         for res in results:
             if res[0] == "Exception":
                 error_rate += 1
-        self.assertLess(error_rate, 5)
+        self.assertLess(error_rate, 5, "The error rate is " + str(error_rate/self.tries))
 
     def test_neural_network1_algorithm_performance(self):
         teachers = Teacher.objects.all()

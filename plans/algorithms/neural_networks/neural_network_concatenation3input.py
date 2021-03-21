@@ -103,7 +103,7 @@ class NeuralNetworkForThreeInputConcatenation(NNPlanGeneratorAlgorithmBase):
         return available_data
 
     def get_av_hours(self, sch_subject):
-        return self.all_available_hours[sch_subject.how_long]
+        return self.all_available_hours[sch_subject.how_long - 1]
 
 
 class NeuralNetworkThreeInputConcatenationRunner:
