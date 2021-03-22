@@ -13,10 +13,17 @@ class GeneticParameters:
         super(GeneticParameters, self).__init__(**kw)
 
 
-class AllParameters(ImprovementParameters, GeneticParameters):
+class NeuralNetworkParameters:
+    def __init__(self, type_of_neural_network, **kw):
+        self.type_of_neural_network = type_of_neural_network
+        super(NeuralNetworkParameters, self).__init__(**kw)
 
-    def __init__(self, number_of_generation, number_of_crossover, number_of_mutation):
+
+class AllParameters(ImprovementParameters, GeneticParameters, NeuralNetworkParameters):
+
+    def __init__(self, number_of_generation, number_of_crossover, number_of_mutation, type_of_neural_network):
         super(AllParameters, self).__init__(tries=number_of_generation,
                                             number_of_generation=number_of_generation,
                                             number_of_crossover=number_of_crossover,
-                                            number_of_mutation=number_of_mutation)
+                                            number_of_mutation=number_of_mutation,
+                                            type_of_neural_network=type_of_neural_network)

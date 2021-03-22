@@ -1,5 +1,5 @@
-from plans.algorithms import RandomPlanAlgorithm, ImprovementAlgorithm, GeneticAlgorithmRunner, NNPlanGeneratorAlgorithm, \
-    GraphAlgorithmRunner
+from plans.algorithms import RandomPlanAlgorithm, ImprovementAlgorithm, GeneticAlgorithmRunner, \
+    GraphAlgorithmRunner, NeuralNetworkRunner
 
 
 def provide_creator(algorithm_name, plan_parameters):
@@ -11,6 +11,6 @@ def provide_creator(algorithm_name, plan_parameters):
         return GeneticAlgorithmRunner(plan_parameters.number_of_generation, plan_parameters.number_of_crossover,
                                       plan_parameters.number_of_mutation)
     if algorithm_name == "algorithm-nn":
-        return NNPlanGeneratorAlgorithm()
+        return NeuralNetworkRunner(type_of_neural_network=plan_parameters.type_of_neural_network)
     if algorithm_name == "algorithm-graph":
         return GraphAlgorithmRunner()
