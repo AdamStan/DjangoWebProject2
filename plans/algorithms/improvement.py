@@ -6,7 +6,8 @@ from datetime import time
 from . import RandomPlanGenerator
 from .algorithms import AlgorithmsHelper
 from entities.models import Room, Teacher, ScheduledSubject, Plan, FieldOfStudy
-from .algorithms_helper import create_scheduled_subjects, create_empty_plans, show_objects, show_subjects
+from .algorithms_helper import create_empty_plans, get_events_by_day
+from .value_strategies import ValueOfPlanStrategy1
 
 
 class ImprovementManagerQuerySets:
@@ -18,6 +19,7 @@ class ImprovementManagerQuerySets:
         self.how_many_lecture = 0
         self.success_lab = 0
         self.success_lec = 0
+        self.value_strategy = ValueOfPlanStrategy1()
 
     @transaction.atomic
     def generation(self, min_hour=8, max_hour=19):
@@ -31,29 +33,24 @@ class ImprovementManagerQuerySets:
         try:
             # 1. losujemy plan
             plan_to_change = choice(self.plans)
-            print("Plan to change = " + str(plan_to_change))
             # 2. losujemy dzien do poki dzien nie jest pusty
             day = choice(self.day_of_week)
             while True:
                 subjects_in_day = self.scheduled_subjects.filter(dayOfWeek=day, plan=plan_to_change)
-                print("Przedmioty w dniu:" + str(subjects_in_day.count()))
                 if subjects_in_day.count() == 0:
                     day = choice(self.day_of_week)
                 else:
                     break
             # 3. z tego dnia wybieramy przedmiot
             subject_to_change = choice(subjects_in_day)
-            ImprovementManagerQuerySets.show_subject(subject_to_change)
             # 4. liczymy wartosc planu
             value_before = self.value_for_plan(subjects_in_plan=self.scheduled_subjects.filter(plan=plan_to_change))
             # 4.1 jesli jest to lab
             if subject_to_change.type == "LAB":
                 if self.steps_for_laboratory(min_hour, max_hour, value_before, subject_to_change, plan_to_change):
-                    print("Improving can be performed...")
                     self.success_lab += 1
                     transaction.savepoint_commit(sid)
                 else:
-                    print("Improving cannot be performed.")
                     transaction.savepoint_rollback(sid)
             # 4.2 jesli jest to lec
             elif subject_to_change.type == "LEC":
@@ -73,25 +70,18 @@ class ImprovementManagerQuerySets:
                 values_after = []
                 values_before = []
                 for sub in others_lectures:
-                    ImprovementManagerQuerySets.show_subject(sub)
                     value = self.value_for_plan(subjects_in_plan=self.scheduled_subjects.filter(plan=sub.plan))
                     values_before.append(value)
                     sub.whenStart = new_whenStart
                     sub.whenFinnish = new_whenFinnish
                     sub.dayOfWeek = new_dayOfWeek
-                    print(value)
                     sub.save()
 
-                print(":::AFTER:::")
                 for sub in others_lectures:
-                    ImprovementManagerQuerySets.show_subject(sub)
                     value = self.value_for_plan(subjects_in_plan=self.scheduled_subjects.filter(plan=sub.plan))
                     values_after.append(value)
-                    print(value)
 
                 value_case = all(value_a <= value_b for value_b, value_a in zip(values_before, values_after))
-                if value_case:
-                    print("Zmiana jest dobra dla każdego planu")
 
                 all_cases = True
                 for sub in others_lectures:
@@ -100,9 +90,6 @@ class ImprovementManagerQuerySets:
                     case3 = AlgorithmsHelper.check_subject_to_subject_time(
                         sub,self.scheduled_subjects.filter(plan=sub.plan).exclude(id=subject_to_change.id))
                     all_cases = all_cases and case1 and case2 and case3
-
-                if all_cases:
-                    print("kejsy spelnione")
 
                 if all_cases and value_case:
                     self.success_lec += 1
@@ -128,13 +115,14 @@ class ImprovementManagerQuerySets:
         subjects_in_day = self.scheduled_subjects.filter(dayOfWeek=subject_to_change.dayOfWeek, plan=plan_to_change)
         available_hours_to_start = self.get_available_hours(min_hour, max_hour, subjects_in_day,
                                                             subject_to_change)
+        if len(available_hours_to_start) == 0:
+            return False
         subject_to_change.whenStart = time(choice(available_hours_to_start), 0, 0)
         fin = subject_to_change.whenStart.hour + subject_to_change.how_long
         subject_to_change.whenFinnish = time(fin, 0, 0)
         # 4.1.2 check new value
         subject_to_change.save()
         value_after = self.value_for_plan(subjects_in_plan=self.scheduled_subjects.filter(plan=plan_to_change))
-        print("New value:" + str(value_after))
 
         isRoomTakenCorrectly = AlgorithmsHelper.check_room_is_not_taken_exclude(subject_to_change,
                                                                                 subject_to_change.room)
@@ -184,8 +172,21 @@ class ImprovementManagerQuerySets:
 
         return value
 
-    def show_subject(subject):
-        print("[Subject:: " + str(subject.subject.name) + str(subject.dayOfWeek) + " " + str(subject.whenStart) + " " + str(subject.whenFinnish) + "]")
+    def calculate_value(self):
+        value = 0
+        sch_subjects_by_plan = self.create_scheduled_subjects_by_plan()
+        for sch_subject_list in sch_subjects_by_plan.values():
+            sch_subjects_by_days = get_events_by_day(sch_subject_list)
+            value += self.value_strategy.get_value_of_plan(sch_subjects_by_days)
+        return value
+
+    def create_scheduled_subjects_by_plan(self):
+        sch_by_plans = dict()
+        for sch_subject in self.scheduled_subjects:
+            if sch_subject.plan.title not in sch_by_plans:
+                sch_by_plans[sch_subject.plan.title] = []
+            sch_by_plans[sch_subject.plan.title].append(sch_subject)
+        return sch_by_plans
 
     def show_conclusion(self):
         print("Tries for lab: " + str(self.how_many_laboratory))
@@ -205,9 +206,11 @@ def make_improvement(how_many=1):
         instance.generation()
 
     instance.show_conclusion()
+    print("Results after improvements")
+    print(instance.calculate_value())
+    return instance.calculate_value()
 
 
-# TODO: create plan with improvements!!!
 class ImprovementAlgorithm:
     TRIES_FOR_NEW_PLAN_CREATION = 10
 
@@ -219,8 +222,6 @@ class ImprovementAlgorithm:
                           max_hour=19):
         teachers = Teacher.objects.all()
         rooms = Room.objects.all()
-        from django.db import connection
-        connection.close()
         result = {"Exception"}
         case = result == {"Exception"}
         logger.log(level=logger.INFO, msg="the case: " + str(case))
@@ -230,7 +231,6 @@ class ImprovementAlgorithm:
             try:
                 fields_of_study = list(FieldOfStudy.objects.all())
                 plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
-                # OnePlanGenerator.show_objects(plans)
                 # in test purpose only!!!
                 first_plan = RandomPlanGenerator(teachers, plans, rooms)
                 result = first_plan.generate_plan(min_hour, max_hour)
@@ -241,9 +241,11 @@ class ImprovementAlgorithm:
                 tries_for_generating_plan += 1
 
         self.save_the_result(result_to_save=result)
-        the_best_result = result
+        self.the_best_result = result
+        print("Result before improvements")
+        print(result)
         logger.log(level=logger.INFO, msg="Improvement starts - with deleting")
-        make_improvement(self.tries)
+        return [first_plan, make_improvement(self.tries), result[1]]
 
     def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
         # create exactly one plan with random generator without deleting plans
@@ -252,8 +254,6 @@ class ImprovementAlgorithm:
         rooms = Room.objects.all()
         plans = Plan.objects.all()
 
-        from django.db import connection
-        connection.close()
         result = {"Exception"}
         case = result == {"Exception"}
         logger.log(level=logger.INFO, msg="the case: " + str(case))
@@ -261,8 +261,6 @@ class ImprovementAlgorithm:
         tries_for_generating_plan = 0
         while result == {"Exception"} and tries_for_generating_plan < ImprovementAlgorithm.TRIES_FOR_NEW_PLAN_CREATION:
             try:
-                # OnePlanGenerator.show_objects(plans)
-                # in test purpose only!!!
                 first_plan = RandomPlanGenerator(teachers, plans, rooms)
                 result = first_plan.generate_plan(min_hour, max_hour)
             except Exception as e:
@@ -272,13 +270,12 @@ class ImprovementAlgorithm:
                 tries_for_generating_plan += 1
 
         self.save_the_result(result_to_save=result)
-        the_best_result = result
+        self.the_best_result = result
         logger.log(level=logger.INFO, msg="Improvement starts - without deleting")
         make_improvement(self.tries)
+        return [first_plan]
 
     def save_the_result(self, result_to_save):
-        from django.db import connection
-        connection.close()
         if result_to_save:
             plans = result_to_save[0].plans
             sch_subject_plans = result_to_save[0].subjects_in_plans

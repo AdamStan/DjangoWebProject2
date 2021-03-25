@@ -8,3 +8,10 @@ class BaseTest(TestCase):
     def setUp(self):
         add_account_data()
         add_entities()
+
+
+def list_to_dict(values):
+    new_dict = dict()
+    for index in range(len(values)):
+        new_dict[index + 1] = values[index]
+    return new_dict
