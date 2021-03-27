@@ -50,7 +50,8 @@ class ImprovementAlgorithmTests(BaseTest):
         report = BasicAlgorithmReport(time_in_seconds, mean_value, "improvement_algo_tests",
                                       other_info_dict={"times_was_run": times_was_run,
                                                        "good_results": len(good_results), "errors": error_rate,
-                                                       "min_value": min_value, "max_value": max_value},
+                                                       "min_value": min_value, "max_value": max_value,
+                                                       "improvement_tries": self.how_many_tries_improve},
                                       lists_with_results=[good_results, good_results_before_improvement],
                                       file_name="report_improvement_tests_")
         report.create_report()

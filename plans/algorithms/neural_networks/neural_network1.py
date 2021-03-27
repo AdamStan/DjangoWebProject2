@@ -55,8 +55,10 @@ class NeuralNetworkForOneInput(NNPlanGeneratorAlgorithmBase):
         for i in range(len(output[0])):
             if output[0][index_max] < output[0][i]:
                 index_max = i
-        print("Max index: " + str(index_max))
-        print("Available actions length: " + str(len(available_actions)))
+        if index_max >= len(available_actions):
+            print(available_hours)
+            print("Chosen index contains 000 values: " + str(index_max))
+        # print("Chosen index: " + str(index_max))
         return available_actions[index_max]
 
 
