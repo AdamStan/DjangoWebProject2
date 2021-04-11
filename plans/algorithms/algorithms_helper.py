@@ -112,3 +112,75 @@ def get_the_same_lecture(lecture, scheduled_subjects):
         if lecture.subject == sch_subject.subject and sch_subject.type == ScheduledSubject.LECTURE:
             return sch_subject
     return None
+
+
+def check_scheduled_subjects_in_plans(subjects_by_day):
+    """
+    @param subjects_by_day:
+    @return: True if are correct - False when incorrect
+    """
+    for sch_subjects_in_day in subjects_by_day.values():
+        for i in range(len(sch_subjects_in_day)):
+            for j in range(i + 1, len(sch_subjects_in_day)):
+                event_first = sch_subjects_in_day[i]
+                event_next = sch_subjects_in_day[j]
+                if not check_events(event_first, event_next):
+                    return False
+    return True
+
+
+def group_subjects_by_teachers(scheduled_subjects_dict):
+    teachers_subjects = dict()
+    for sch_subjects_in_plan in scheduled_subjects_dict.values():
+        for sch_subject in sch_subjects_in_plan:
+            if str(sch_subject.teacher) not in teachers_subjects:
+                teachers_subjects[str(sch_subject.teacher)] = list()
+            teachers_subjects[str(sch_subject.teacher)].append(sch_subject)
+    return teachers_subjects
+
+
+def group_subjects_by_rooms(scheduled_subjects_dict):
+    rooms_subjects = dict()
+
+    for sch_subjects_in_plan in scheduled_subjects_dict.values():
+        for sch_subject in sch_subjects_in_plan:
+            if sch_subject.room.id not in rooms_subjects:
+                rooms_subjects[sch_subject.room.id] = list()
+            rooms_subjects[sch_subject.room.id].append(sch_subject)
+    return rooms_subjects
+
+
+def check_events(event1, event2):
+    """
+    @param event1:
+    @param event2:
+    @return: True if are correct!
+    """
+    if event1.dayOfWeek != event2.dayOfWeek:
+        return True
+    difference_between_starts = abs(event1.whenStart.hour - event2.whenStart.hour)
+    difference_between_ends = abs(event1.whenFinnish.hour - event2.whenFinnish.hour)
+    if (difference_between_starts + difference_between_ends) < (event1.how_long + event2.how_long):
+        return False
+    return True
+
+
+def check_scheduled_subjects_with_lectures(scheduled_subjects_dict):
+    """
+    @param scheduled_subjects_dict:
+    @return: True if are correct - False when incorrect
+    """
+    for sch_subjects_in_day in scheduled_subjects_dict.values():
+        for i in range(len(sch_subjects_in_day)):
+            for j in range(i + 1, len(sch_subjects_in_day)):
+                event_first = sch_subjects_in_day[i]
+                event_next = sch_subjects_in_day[j]
+                if not check_events(event_first, event_next):
+                    print(event_first)
+                    print(event_next)
+                    if event_next.subject == event_first.subject and event_next.type == ScheduledSubject.LECTURE and \
+                            event_first.type == ScheduledSubject.LECTURE:
+                        print("The same lectures!")
+                        continue
+                    return False
+    return True

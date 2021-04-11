@@ -4,7 +4,7 @@ import random
 from entities.models import FieldOfStudy, Teacher, Room, Plan, ScheduledSubject
 from plans.algorithms.algorithms_helper import check_action_can_be_done, create_scheduled_subjects, create_empty_plans
 from plans.algorithms.neural_networks.neural_network_algorithm import NNPlanGeneratorAlgorithmBase
-from plans.algorithms.neural_networks.neural_network_concatenation3input import \
+from plans.algorithms.neural_networks.neural_network3 import \
     NeuralNetworkThreeInputConcatenationRunner
 
 
