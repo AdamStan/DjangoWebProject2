@@ -9,6 +9,7 @@ from .algorithms_helper import create_empty_plans, get_events_by_day, check_acti
     create_scheduled_subjects, check_room_can_be_set, check_teacher_can_teach, check_hour_is_available, \
     get_the_same_lecture
 from .state import Action
+from .value_strategies import ValueOfPlanStrategy1
 
 
 class GeneticAlgorithm:
@@ -37,6 +38,7 @@ class GeneticAlgorithm:
         self.scheduled_subjects_to_teachers = sch_subjects_teachers
         # dict room - key, list of scheduled_subjects - value
         self.scheduled_subjects_to_rooms = sch_subjects_rooms
+        self.value_strategy = ValueOfPlanStrategy1()
 
     def perform(self):
         for i in range(0, self.number_of_generations):
@@ -211,6 +213,14 @@ class GeneticAlgorithm:
         scheduled_subject.teacher = action.teacher
         self.scheduled_subjects_to_teachers[action.teacher].append(scheduled_subject)
 
+    def calculate_value(self):
+        value = 0
+        sch_subjects_by_plan = self.scheduled_subjects
+        for sch_subject_list in sch_subjects_by_plan.values():
+            sch_subjects_by_days = get_events_by_day(sch_subject_list)
+            value += self.value_strategy.get_value_of_plan(sch_subjects_by_days)
+        return value
+
 
 class GeneticAlgorithmRunner:
     TRIES_FOR_NEW_PLAN_CREATION = 10
@@ -232,12 +242,12 @@ class GeneticAlgorithmRunner:
         tries_for_generating_plan = 0
         while result == {"Exception"} \
                 and tries_for_generating_plan < GeneticAlgorithmRunner.TRIES_FOR_NEW_PLAN_CREATION:
+            fields_of_study = list(FieldOfStudy.objects.all())
+            plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
+            # OnePlanGenerator.show_objects(plans)
+            # in test purpose only!!!
+            first_plan = RandomPlanGenerator(teachers, plans, rooms)
             try:
-                fields_of_study = list(FieldOfStudy.objects.all())
-                plans = create_empty_plans(fields_of_study, how_many_plans, winter_or_summer)
-                # OnePlanGenerator.show_objects(plans)
-                # in test purpose only!!!
-                first_plan = RandomPlanGenerator(teachers, plans, rooms)
                 result = first_plan.generate_plan(min_hour, max_hour)
             except Exception as e:
                 logger.log(level=logger.INFO, msg=e)
@@ -249,6 +259,8 @@ class GeneticAlgorithmRunner:
         logger.log(level=logger.INFO, msg="Genetic algorithm starts - with deleting")
         self.make_generations(min_hour, max_hour)
         self.save_the_result()
+        result.append(first_plan.calculate_value())
+        return result
 
     def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
         # create exactly one plan with random generator without deleting plans
@@ -283,7 +295,6 @@ class GeneticAlgorithmRunner:
         self.save_the_result()
 
     def save_the_result(self):
-        # TODO: saves values from self.algorithm
         if self.the_best_result:
             plans = self.the_best_result[0].plans
             sch_subject_plans = self.the_best_result[0].subjects_in_plans
