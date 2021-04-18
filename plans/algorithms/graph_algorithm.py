@@ -105,6 +105,7 @@ class GraphAlgorithmRunner:
 
         self.the_best_result = "result", algorithm.value_of_plans()
         algorithm.save_result()
+        return self.the_best_result
 
     def create_plan_async_without_deleting(self, min_hour=8, max_hour=19):
         teachers = Teacher.objects.all()
