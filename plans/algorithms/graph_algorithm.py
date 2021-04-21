@@ -103,7 +103,7 @@ class GraphAlgorithmRunner:
         algorithm = GraphAlgorithm(teachers, rooms, plans, plans_scheduled_subjects, min_hour, max_hour)
         algorithm.create_plan()
 
-        self.the_best_result = "result", algorithm.value_of_plans()
+        self.the_best_result = [algorithm, algorithm.value_of_plans()]
         algorithm.save_result()
         return self.the_best_result
 

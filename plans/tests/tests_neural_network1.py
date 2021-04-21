@@ -4,10 +4,8 @@ from statistics import mean
 import logging as log
 
 from entities.models import FieldOfStudy, Teacher, Room
-from .base_test import BaseTest
+from .base_test import BaseTest, check_conflicts_in_result_dict
 from plans.algorithms import create_empty_plans, create_scheduled_subjects, NeuralNetworkForOneInput
-from ..algorithms.algorithms_helper import get_events_by_day, check_scheduled_subjects_in_plans, \
-    group_subjects_by_teachers, check_scheduled_subjects_with_lectures, group_subjects_by_rooms
 from ..report_generator import BasicAlgorithmReport
 
 
@@ -113,7 +111,7 @@ class NeuralNetworkOneInputGoodResultsTests(BaseTest):
                                          scheduled_subjects_in_plans=plans_scheduled_subjects,
                                          min_hour=self.min_hour, max_hour=self.max_hour)
             out = first_plan.create_plan()
-            out.append(self.check_conflicts_in_result(first_plan))
+            out.append(check_conflicts_in_result_dict(first_plan))
             results.append(out)
 
         except Exception as e:
@@ -150,27 +148,5 @@ class NeuralNetworkOneInputGoodResultsTests(BaseTest):
                                                        "good_results": len(good_results), "errors": error_rate,
                                                        "min_value": min_value, "max_value": max_value,},
                                       lists_with_results=[good_results, result_was_good],
-                                      file_name="report_nn_1_conflicts")
+                                      file_name="report_nn_1_conflicts_")
         report.create_report()
-
-    def check_conflicts_in_result(self, generator_with_scheduled_subjects):
-        # check conflicts in all plan
-        for sch_subject_list in generator_with_scheduled_subjects.scheduled_subjects.values():
-            # get subject by days and use function to check conflicts for that
-            sch_by_days = get_events_by_day(sch_subject_list)
-            are_correct = check_scheduled_subjects_in_plans(sch_by_days)
-            if not are_correct:
-                return True
-        # check conflicts for teachers
-        teachers_subjects = group_subjects_by_teachers(generator_with_scheduled_subjects.scheduled_subjects)
-        # get subject by days and use function to check conflicts for that
-        are_correct = check_scheduled_subjects_with_lectures(teachers_subjects)
-        if not are_correct:
-            return True
-        # check conflicts for rooms
-        rooms_subjects = group_subjects_by_rooms(generator_with_scheduled_subjects.scheduled_subjects)
-        # get subject by days and use function to check conflicts for that
-        are_correct = check_scheduled_subjects_with_lectures(rooms_subjects)
-        if not are_correct:
-            return True
-        return False
