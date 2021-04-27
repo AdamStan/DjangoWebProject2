@@ -51,7 +51,6 @@ class Environment:
     def get_cost_of_action(self, action):
         plan = action.plan
         subjects_in_plan = self.scheduled_subjects[plan.title]
-        cost_before_for_debugging = self.strategy.get_value_of_plan(subjects_in_plan)
         cost = self.strategy.get_value_of_plan_after_action(subjects_in_plan, action)
         return cost
 

@@ -193,6 +193,7 @@ class ImprovementManagerQuerySets:
         print("Tries for lec: " + str(self.how_many_lecture))
         print("Success (lab): " + str(self.success_lab))
         print("Success (lec): " + str(self.success_lec))
+        return self.how_many_laboratory, self.how_many_lecture, self.success_lab, self.success_lec
 
 
 def make_improvement(how_many=1):
@@ -205,10 +206,10 @@ def make_improvement(how_many=1):
     for i in range(0, how_many):
         instance.generation()
 
-    instance.show_conclusion()
+    tries_lab, tries_lec, suc_lab, suc_lec = instance.show_conclusion()
     print("Results after improvements")
     print(instance.calculate_value())
-    return instance.calculate_value()
+    return instance.calculate_value(), tries_lab, tries_lec, suc_lab, suc_lec
 
 
 class ImprovementAlgorithm:

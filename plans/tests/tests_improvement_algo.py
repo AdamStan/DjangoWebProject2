@@ -9,7 +9,7 @@ from ..report_generator import BasicAlgorithmReport
 
 
 class ImprovementAlgorithmTests(BaseTest):
-    HOW_MANY_TIMES_RUN = 20
+    HOW_MANY_TIMES_RUN = 100
 
     def setUp(self):
         super(ImprovementAlgorithmTests, self).setUp()
@@ -33,11 +33,19 @@ class ImprovementAlgorithmTests(BaseTest):
         error_rate = 0
         good_results = list()
         good_results_before_improvement = list()
+        tries_labs = list()
+        tries_lec = list()
+        suc_labs = list()
+        suc_lec = list()
         for res in results:
             if res[0] == "Exception":
                 error_rate += 1
             else:
-                good_results.append(res[1])
+                good_results.append(res[1][0])
+                tries_labs.append(res[1][1])
+                tries_lec.append(res[1][2])
+                suc_labs.append(res[1][3])
+                suc_lec.append(res[1][4])
                 good_results_before_improvement.append(res[2])
 
         min_value = min(good_results)
@@ -52,8 +60,9 @@ class ImprovementAlgorithmTests(BaseTest):
                                                        "good_results": len(good_results), "errors": error_rate,
                                                        "min_value": min_value, "max_value": max_value,
                                                        "improvement_tries": self.how_many_tries_improve},
-                                      lists_with_results=[good_results, good_results_before_improvement],
-                                      file_name="report_improvement_tests_")
+                                      lists_with_results=[good_results, good_results_before_improvement, tries_labs,
+                                                          tries_lec, suc_labs, suc_lec],
+                                      file_name="report_improvement_lab_and_lectures_tests_")
         report.create_report()
 
     def run_algorithm(self):

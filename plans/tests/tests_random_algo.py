@@ -59,7 +59,8 @@ class RandomAlgorithmTests(BaseTest):
         report = BasicAlgorithmReport(time_in_seconds, mean_value, "random_algo_test",
                                       other_info_dict={"times_was_run": times_was_run,
                                                        "good_results": len(good_results), "errors": error_rate,
-                                                       "min_value": min_value, "max_value": max_value})
+                                                       "min_value": min_value, "max_value": max_value},
+                                      file_name="report_random_algo_")
         report.create_report()
 
     def run_algorithm(self, fields, teachers, rooms):
