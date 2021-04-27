@@ -9,7 +9,7 @@ from ..report_generator import BasicAlgorithmReport
 
 
 class GeneticAlgorithmTests(BaseTest):
-    HOW_MANY_TIMES_RUN = 40
+    HOW_MANY_TIMES_RUN = 100
 
     def setUp(self):
         super(GeneticAlgorithmTests, self).setUp()
@@ -19,7 +19,7 @@ class GeneticAlgorithmTests(BaseTest):
         self.max_hour = 19
         self.generations = 24
         self.crossover = 0.8
-        self.mutation = 0.2
+        self.mutation = 1
 
     def test_improvement_algorithm(self):
         results = self.run_algorithm()

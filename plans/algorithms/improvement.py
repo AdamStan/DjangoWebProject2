@@ -35,14 +35,18 @@ class ImprovementManagerQuerySets:
             plan_to_change = choice(self.plans)
             # 2. losujemy dzien do poki dzien nie jest pusty
             day = choice(self.day_of_week)
-            while True:
+            subject_to_change = None
+            while subject_to_change is None:
                 subjects_in_day = self.scheduled_subjects.filter(dayOfWeek=day, plan=plan_to_change)
                 if subjects_in_day.count() == 0:
                     day = choice(self.day_of_week)
-                else:
-                    break
-            # 3. z tego dnia wybieramy przedmiot
-            subject_to_change = choice(subjects_in_day)
+                    continue
+                # 3. z tego dnia wybieramy przedmiot
+                subject_to_change = choice(subjects_in_day)
+                if subject_to_change.type == "LEC":
+                    subject_to_change = None
+                    day = choice(self.day_of_week)
+
             # 4. liczymy wartosc planu
             value_before = self.value_for_plan(subjects_in_plan=self.scheduled_subjects.filter(plan=plan_to_change))
             # 4.1 jesli jest to lab

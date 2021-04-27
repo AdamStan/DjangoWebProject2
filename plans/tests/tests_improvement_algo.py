@@ -17,7 +17,7 @@ class ImprovementAlgorithmTests(BaseTest):
         self.winter_or_summer = FieldOfStudy.WINTER
         self.min_hour = 8
         self.max_hour = 19
-        self.how_many_tries_improve = 1_000
+        self.how_many_tries_improve = 200
 
     def test_improvement_algorithm(self):
         results = self.run_algorithm()
@@ -62,7 +62,7 @@ class ImprovementAlgorithmTests(BaseTest):
                                                        "improvement_tries": self.how_many_tries_improve},
                                       lists_with_results=[good_results, good_results_before_improvement, tries_labs,
                                                           tries_lec, suc_labs, suc_lec],
-                                      file_name="report_improvement_lab_and_lectures_tests_")
+                                      file_name="report_improvement_lab200_tests_")
         report.create_report()
 
     def run_algorithm(self):
