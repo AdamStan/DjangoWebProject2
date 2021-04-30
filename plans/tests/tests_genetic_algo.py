@@ -17,7 +17,7 @@ class GeneticAlgorithmTests(BaseTest):
         self.winter_or_summer = FieldOfStudy.WINTER
         self.min_hour = 8
         self.max_hour = 19
-        self.generations = 24
+        self.generations = 50
         self.crossover = 0.8
         self.mutation = 1
 
