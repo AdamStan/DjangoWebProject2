@@ -81,3 +81,38 @@ class RandomAlgorithmTests(BaseTest):
             except Exception:
                 results.append(["Exception", sys.maxsize])
         return results
+
+    def test_true_random_algorithm_performance(self):
+        teachers = Teacher.objects.all()
+        rooms = Room.objects.all()
+        fields = FieldOfStudy.objects.all()
+        results = list()
+        before = time.time_ns()
+        for i in range(RandomAlgorithmTests.HOW_MANY_TIMES_RUN):
+            results.append(self.run_algorithm(fields, teachers, rooms))
+        after = time.time_ns()
+        # odfiltrowanie listy z Exception...
+        error_rate = 0
+        good_results = list()
+        for res_list in results:
+            temp_results = []
+            for res in res_list:
+                if res[0] != "Exception":
+                    temp_results.append(res[1])
+            if len(temp_results) < 1:
+                error_rate += 1
+                continue
+            good_results.append(min(temp_results))
+
+        min_value = min(good_results)
+        max_value = max(good_results)
+        mean_value = mean(good_results)
+        time_in_seconds = (after - before) / 1_000_000_000
+        times_was_run = RandomAlgorithmTests.HOW_MANY_TIMES_RUN
+
+        report = BasicAlgorithmReport(time_in_seconds, mean_value, "random_algo_test",
+                                      other_info_dict={"times_was_run": times_was_run,
+                                                       "good_results": len(good_results), "errors": error_rate,
+                                                       "min_value": min_value, "max_value": max_value},
+                                      file_name="report_true_random_algo_")
+        report.create_report()
